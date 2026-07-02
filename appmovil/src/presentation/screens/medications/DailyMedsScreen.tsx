@@ -4,6 +4,7 @@ import { useInjection } from '@/presentation/hooks/useInjection';
 import { useAuthStore } from '@/presentation/stores/authStore';
 import { MedicationLog } from '@/domain/entities';
 import MedicationCard from '@/presentation/components/MedicationCard';
+import ScreenBackground from '@/presentation/components/ScreenBackground';
 
 export default function DailyMedsScreen() {
   const { medicationRepo } = useInjection();
@@ -34,38 +35,42 @@ export default function DailyMedsScreen() {
 
   if (!selectedPatientId) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.hint}>Selecciona un paciente desde la pestaña Pacientes.</Text>
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <Text style={styles.hint}>Selecciona un paciente desde Inicio → Mis pacientes.</Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
-  if (isLoading) return <ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" />;
+  if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" /></ScreenBackground>;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Medicamentos de hoy</Text>
-      <FlatList
-        data={data}
-        keyExtractor={(i: MedicationLog) => i.id}
-        renderItem={({ item }) => (
-          <MedicationCard
-            log={item}
-            onConfirm={() => confirmMutation.mutate(item.id)}
-            onMiss={() => missMutation.mutate(item.id)}
-          />
-        )}
-        ListEmptyComponent={<Text style={styles.empty}>Sin medicamentos programados para hoy.</Text>}
-        contentContainerStyle={{ padding: 16 }}
-      />
-    </View>
+    <ScreenBackground>
+      <View style={styles.container}>
+        <Text style={styles.header}>Medicamentos de hoy</Text>
+        <FlatList
+          data={data}
+          keyExtractor={(i: MedicationLog) => i.id}
+          renderItem={({ item }) => (
+            <MedicationCard
+              log={item}
+              onConfirm={() => confirmMutation.mutate(item.id)}
+              onMiss={() => missMutation.mutate(item.id)}
+            />
+          )}
+          ListEmptyComponent={<Text style={styles.empty}>Sin medicamentos programados para hoy.</Text>}
+          contentContainerStyle={{ padding: 16 }}
+        />
+      </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f7fa' },
+  container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  header: { fontSize: 18, fontWeight: '600', padding: 16, color: '#1a1a2e' },
-  hint: { color: '#aaa', textAlign: 'center' },
-  empty: { textAlign: 'center', color: '#aaa', marginTop: 40 },
+  header: { fontSize: 18, fontWeight: '600', padding: 16, color: '#fff' },
+  hint: { color: '#e2e8f0', textAlign: 'center' },
+  empty: { textAlign: 'center', color: '#e2e8f0', marginTop: 40 },
 });

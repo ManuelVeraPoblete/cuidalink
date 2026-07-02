@@ -5,6 +5,7 @@ import { RouteProp } from '@react-navigation/native';
 import { PatientStackParams } from '@/presentation/navigation/AppNavigator';
 import { useInjection } from '@/presentation/hooks/useInjection';
 import CollaboratorsSection from '@/presentation/components/CollaboratorsSection';
+import ScreenBackground from '@/presentation/components/ScreenBackground';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'PatientDetail'>;
@@ -20,34 +21,36 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
     queryFn: () => patientRepo.getPatient(patientId),
   });
 
-  if (isLoading) return <ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" />;
+  if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" /></ScreenBackground>;
   if (!patient) return null;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.name}>{patient.fullName}</Text>
-      <Text style={styles.meta}>Nacimiento: {patient.birthDate}</Text>
+    <ScreenBackground>
+      <ScrollView style={styles.container}>
+        <Text style={styles.name}>{patient.fullName}</Text>
+        <Text style={styles.meta}>Nacimiento: {patient.birthDate}</Text>
 
-      {patient.isOwner && (
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('EditPatient', { patientId })}>
-            <Text style={styles.btnText}>Editar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={() => navigation.navigate('RecordVitals', { patientId })}>
-            <Text style={styles.btnSecondaryText}>Registrar Vitales</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+        {patient.isOwner && (
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('EditPatient', { patientId })}>
+              <Text style={styles.btnText}>Editar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={() => navigation.navigate('RecordVitals', { patientId })}>
+              <Text style={styles.btnSecondaryText}>Registrar Vitales</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-      <CollaboratorsSection patientId={patientId} isOwner={patient.isOwner} />
-    </ScrollView>
+        <CollaboratorsSection patientId={patientId} isOwner={patient.isOwner} />
+      </ScrollView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f7fa', padding: 20 },
-  name: { fontSize: 22, fontWeight: 'bold', color: '#1a1a2e', marginBottom: 4 },
-  meta: { fontSize: 14, color: '#888', marginBottom: 24 },
+  container: { flex: 1, backgroundColor: 'transparent', padding: 20 },
+  name: { fontSize: 22, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
+  meta: { fontSize: 14, color: '#e2e8f0', marginBottom: 24 },
   actions: { flexDirection: 'row', gap: 12, marginBottom: 24 },
   btn: { flex: 1, backgroundColor: '#2D7DD2', padding: 12, borderRadius: 8, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '600' },

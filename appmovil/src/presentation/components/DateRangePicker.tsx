@@ -44,7 +44,7 @@ export default function DateRangePicker({ onGenerate, loading }: Props) {
 
 const styles = StyleSheet.create({
   container: { gap: 10 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, fontSize: 15 },
+  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, fontSize: 15, backgroundColor: 'rgba(255,255,255,0.9)' },
   btn: { backgroundColor: '#2D7DD2', padding: 14, borderRadius: 8, alignItems: 'center' },
   btnDisabled: { backgroundColor: '#aaa' },
   btnText: { color: '#fff', fontWeight: '600' },

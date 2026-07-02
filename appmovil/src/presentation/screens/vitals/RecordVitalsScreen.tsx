@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { PatientStackParams } from '@/presentation/navigation/AppNavigator';
 import { useInjection } from '@/presentation/hooks/useInjection';
+import ScreenBackground from '@/presentation/components/ScreenBackground';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'RecordVitals'>;
@@ -41,32 +42,38 @@ export default function RecordVitalsScreen({ navigation, route }: Props) {
     }
   };
 
-  if (isLoading) return <ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" />;
+  if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" /></ScreenBackground>;
 
   return (
-    <ScrollView style={styles.container}>
-      {definitions?.map((def) => (
-        <View key={def.id} style={styles.field}>
-          <Text style={styles.label}>{def.name} ({def.unit})</Text>
-          <TextInput
-            style={styles.input}
-            placeholder={`Valor${def.minValue != null ? ` (${def.minValue}-${def.maxValue})` : ''}`}
-            keyboardType="numeric"
-            value={values[def.id] ?? ''}
-            onChangeText={(v) => setValues((prev) => ({ ...prev, [def.id]: v }))}
-          />
-        </View>
-      ))}
+    <ScreenBackground>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <View style={styles.sheet}>
+          {definitions?.map((def) => (
+            <View key={def.id} style={styles.field}>
+              <Text style={styles.label}>{def.name} ({def.unit})</Text>
+              <TextInput
+                style={styles.input}
+                placeholder={`Valor${def.minValue != null ? ` (${def.minValue}-${def.maxValue})` : ''}`}
+                keyboardType="numeric"
+                value={values[def.id] ?? ''}
+                onChangeText={(v) => setValues((prev) => ({ ...prev, [def.id]: v }))}
+              />
+            </View>
+          ))}
 
-      <TouchableOpacity style={styles.button} onPress={handleSave} disabled={saving}>
-        {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Guardar Registros</Text>}
-      </TouchableOpacity>
-    </ScrollView>
+          <TouchableOpacity style={styles.button} onPress={handleSave} disabled={saving}>
+            {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Guardar Registros</Text>}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: 'transparent' },
+  content: { padding: 20 },
+  sheet: { backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 20, padding: 20 },
   field: { marginBottom: 20 },
   label: { fontSize: 15, fontWeight: '500', color: '#333', marginBottom: 6 },
   input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, fontSize: 16 },

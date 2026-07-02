@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Alert, ActivityIndicator, ScrollView, Modal, FlatList, Platform,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +12,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 import { PatientStackParams } from '@/presentation/navigation/AppNavigator';
 import { useInjection } from '@/presentation/hooks/useInjection';
+import { isValidRut } from '@/domain/utils/rut';
+import { isValidChileSubscriberNumber, toChilePhone } from '@/domain/utils/chilePhone';
+import ScreenBackground from '@/presentation/components/ScreenBackground';
 
 const GENDER_OPTIONS = [
   { label: 'Masculino', value: 'MALE' },
@@ -21,15 +25,15 @@ const GENDER_OPTIONS = [
 const BLOOD_TYPE_OPTIONS = ['A+', 'A−', 'B+', 'B−', 'AB+', 'AB−', 'O+', 'O−', 'No sé'];
 
 const schema = z.object({
-  fullName:              z.string().min(2, 'Nombre requerido'),
-  identificationNumber:  z.string().min(1, 'RUT requerido'),
-  birthDate:             z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha requerida'),
-  gender:                z.enum(['MALE', 'FEMALE', 'OTHER']),
-  address:               z.string().min(1, 'Dirección requerida'),
-  emergencyContactName:  z.string().min(1, 'Nombre contacto requerido'),
-  emergencyContactPhone: z.string().min(1, 'Teléfono requerido'),
-  healthInsurance:       z.string().min(1, 'Previsión requerida'),
-  bloodType:             z.string().min(1, 'Grupo sanguíneo requerido'),
+  fullName:              z.string({ error: 'Nombre requerido' }).min(2, 'El nombre debe tener al menos 2 caracteres'),
+  identificationNumber:  z.string({ error: 'RUT requerido' }).min(1, 'RUT requerido').refine(isValidRut, 'El RUT ingresado no es válido'),
+  birthDate:             z.string({ error: 'Fecha de nacimiento requerida' }).regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha de nacimiento requerida'),
+  gender:                z.enum(['MALE', 'FEMALE', 'OTHER'], { error: 'Selecciona el sexo del paciente' }),
+  address:               z.string({ error: 'Dirección requerida' }).min(1, 'Dirección requerida'),
+  emergencyContactName:  z.string({ error: 'Nombre del contacto de emergencia requerido' }).min(1, 'Nombre del contacto de emergencia requerido'),
+  emergencyContactPhone: z.string({ error: 'Teléfono del contacto de emergencia requerido' }).refine(isValidChileSubscriberNumber, 'Ingresa los 9 dígitos del celular, sin el +56'),
+  healthInsurance:       z.string({ error: 'Previsión de salud requerida' }).min(1, 'Previsión de salud requerida'),
+  bloodType:             z.string({ error: 'Grupo sanguíneo requerido' }).min(1, 'Grupo sanguíneo requerido'),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -47,13 +51,13 @@ function calcAge(dateStr: string): string {
 export default function CreatePatientScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showGenderModal, setShowGenderModal] = useState(false);
   const [showBloodModal, setShowBloodModal] = useState(false);
   const { patientRepo } = useInjection();
   const queryClient = useQueryClient();
 
   const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
+    mode: 'onChange',
     defaultValues: { birthDate: '', bloodType: '' },
   });
 
@@ -64,7 +68,10 @@ export default function CreatePatientScreen({ navigation }: Props) {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
-      await patientRepo.createPatient(data);
+      await patientRepo.createPatient({
+        ...data,
+        emergencyContactPhone: toChilePhone(data.emergencyContactPhone),
+      });
       await queryClient.invalidateQueries({ queryKey: ['patients'] });
       navigation.goBack();
     } catch {
@@ -75,7 +82,9 @@ export default function CreatePatientScreen({ navigation }: Props) {
   };
 
   return (
+    <ScreenBackground>
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <View style={styles.sheet}>
       <Text style={styles.sectionTitle}>Datos personales</Text>
 
       <Text style={styles.label}>Nombre completo *</Text>
@@ -124,12 +133,17 @@ export default function CreatePatientScreen({ navigation }: Props) {
       ) : null}
 
       <Text style={styles.label}>Sexo *</Text>
-      <TouchableOpacity style={[styles.input, errors.gender && styles.inputError]}
-        onPress={() => setShowGenderModal(true)}>
-        <Text style={{ color: gender ? '#000' : '#aaa', fontSize: 16 }}>
-          {GENDER_OPTIONS.find(o => o.value === gender)?.label || 'Seleccionar sexo'}
-        </Text>
-      </TouchableOpacity>
+      <View style={[styles.input, styles.pickerWrapper, errors.gender && styles.inputError]}>
+        <Picker
+          selectedValue={gender}
+          onValueChange={(value) => setValue('gender', value, { shouldValidate: true })}
+        >
+          <Picker.Item label="Seleccionar sexo" value={undefined} enabled={false} color="#aaa" />
+          {GENDER_OPTIONS.map(opt => (
+            <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+          ))}
+        </Picker>
+      </View>
       {errors.gender && <Text style={styles.error}>{errors.gender.message}</Text>}
 
       <Text style={styles.label}>Dirección *</Text>
@@ -149,10 +163,14 @@ export default function CreatePatientScreen({ navigation }: Props) {
       {errors.emergencyContactName && <Text style={styles.error}>{errors.emergencyContactName.message}</Text>}
 
       <Text style={styles.label}>Teléfono *</Text>
-      <Controller control={control} name="emergencyContactPhone" render={({ field: { onChange, value } }) => (
-        <TextInput style={[styles.input, errors.emergencyContactPhone && styles.inputError]}
-          placeholder="+56912345678" keyboardType="phone-pad" value={value} onChangeText={onChange} />
-      )} />
+      <View style={[styles.input, styles.phoneRow, errors.emergencyContactPhone && styles.inputError]}>
+        <Text style={styles.phonePrefix}>🇨🇱 +56</Text>
+        <Controller control={control} name="emergencyContactPhone" render={({ field: { onChange, value } }) => (
+          <TextInput style={styles.phoneInput}
+            placeholder="912345678" keyboardType="number-pad" maxLength={9}
+            value={value} onChangeText={(text) => onChange(text.replace(/\D/g, ''))} />
+        )} />
+      </View>
       {errors.emergencyContactPhone && <Text style={styles.error}>{errors.emergencyContactPhone.message}</Text>}
 
       <Text style={styles.sectionTitle}>Información médica</Text>
@@ -176,23 +194,7 @@ export default function CreatePatientScreen({ navigation }: Props) {
       <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)} disabled={loading}>
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Crear Paciente</Text>}
       </TouchableOpacity>
-
-      <Modal visible={showGenderModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Seleccionar sexo</Text>
-            {GENDER_OPTIONS.map(opt => (
-              <TouchableOpacity key={opt.value} style={styles.modalItem}
-                onPress={() => { setValue('gender', opt.value, { shouldValidate: true }); setShowGenderModal(false); }}>
-                <Text style={styles.modalItemText}>{opt.label}</Text>
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity onPress={() => setShowGenderModal(false)}>
-              <Text style={styles.modalCancel}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      </View>
 
       <Modal visible={showBloodModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
@@ -215,16 +217,22 @@ export default function CreatePatientScreen({ navigation }: Props) {
         </View>
       </Modal>
     </ScrollView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: 'transparent' },
   content: { padding: 24, paddingBottom: 48 },
+  sheet: { backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 20, padding: 20 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#2D7DD2', marginTop: 24, marginBottom: 8 },
   label: { fontSize: 14, color: '#444', marginBottom: 4, marginTop: 12 },
   input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, fontSize: 16, justifyContent: 'center', minHeight: 48 },
   inputError: { borderColor: '#e53e3e' },
+  pickerWrapper: { padding: 0, justifyContent: 'center' },
+  phoneRow: { flexDirection: 'row', alignItems: 'center', padding: 0, paddingLeft: 12 },
+  phonePrefix: { fontSize: 16, color: '#333', marginRight: 8 },
+  phoneInput: { flex: 1, fontSize: 16, padding: 12 },
   error: { color: '#e53e3e', fontSize: 12, marginTop: 2 },
   ageRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
   ageLabel: { fontSize: 14, color: '#666', marginRight: 8 },

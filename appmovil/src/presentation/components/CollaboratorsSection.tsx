@@ -57,8 +57,8 @@ export default function CollaboratorsSection({ patientId, isOwner }: Props) {
 
 const styles = StyleSheet.create({
   section: { marginTop: 8 },
-  title: { fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 8 },
-  item: { fontSize: 14, color: '#555', marginBottom: 4 },
+  title: { fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 8 },
+  item: { fontSize: 14, color: '#e2e8f0', marginBottom: 4 },
   btn: { backgroundColor: '#2D7DD2', padding: 12, borderRadius: 8, alignItems: 'center', marginTop: 12 },
   btnText: { color: '#fff', fontWeight: '600' },
   btnOutline: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#2D7DD2' },
