@@ -67,8 +67,8 @@ de git en TODO el repo. Ya arreglado antes de empezar esta feature.
 - [ ] Task 2: Exponer type en la API y enriquecer los logs diarios
 - [x] Task 3: Mobile — entidades type/instructions y corregir confirmar/omitir
 - [x] Task 4: MedicationActionModal (nuevo)
-- [ ] Task 5: Rediseñar MedicationCard
-- [ ] Task 6: Rediseñar DailyMedsScreen
+- [x] Task 5: Rediseñar MedicationCard
+- [x] Task 6: Rediseñar DailyMedsScreen
 
 Task 1: complete (commits b1676f9..eb86e82, review clean — Minor: convenience-constructor Javadoc borderline vs no-comments rule, non-blocking)
 
@@ -77,3 +77,11 @@ Task 2: complete (commits eb86e82..b2b7d64, review clean — MedicationIntegrati
 Task 3: complete (commits b2b7d64..94578d2, review clean — also touched patientDisplay.test.ts, verified mechanical fixture-only ripple from new required MedicationLog fields. Minor/out-of-scope: Medication.ts frequency/scheduledTimes fields don't match backend's nested schedule DTO shape, pre-existing bug unrelated to this feature, flag for future task)
 
 Task 4: complete (commits 94578d2..7f14d94, review clean — Reviewer's cannot-verify item on Intl/es-CL support resolved by controller: same toLocaleTimeString('es-CL',...) pattern already used and working elsewhere in the app. Minor: null-log mid-visible transition skips fade animation, non-blocking, noted for Task 6 wiring)
+
+Task 5: complete (commits 7f14d94..7f90f41, review clean after fix — first pass had scope creep: implementer wired MedicationActionModal into DailyMedsScreen.tsx, which is Task 6's exclusive scope; fix commit 7f90f41 trimmed it to a minimal call-site change, re-review confirmed clean)
+
+Task 6: complete (commits 7f90f41..3302fe7, review clean — 59/59 tests, tsc clean. Minor: MISSED logs only visible under 'Todos' tab (spec-derived, not a deviation), no test exercises 'Omitir' path (brief's test content, not implementer's gap), Expo v56 AGENTS.md doc-fetch instruction reasonably disregarded since no new API surface used)
+
+Revisión final de rama: APROBADA (Ready to merge: Yes). 59/59 tests mobile, tsc limpio, backend compila (main+test), MedicationServiceTest verde. El único test no ejecutable (MedicationIntegrationTest.getDailyLogs_includesMedicationDetails, requiere Docker) fue trazado línea por línea por el revisor y confirmado como correcto — debería pasar si se corre con Docker.
+Important #1 (join en la capa de controller en vez de un use case dedicado) y #2 (fetch redundante de Medication en confirm()) son decisiones deliberadas del plan/spec, confirmadas como intencionales, no bloqueantes.
+Minor (no bloqueantes, para futuro): sin null-guard defensivo en toResponse (seguro hoy, latente si se agrega hard-delete), logs legacy sin patientId fallarían al confirmar (no aplica, app greenfield), botones del modal no se deshabilitan durante la mutación (doble-tap podría disparar 2 PATCH, el segundo simplemente 400), Javadoc de constructoras de conveniencia bordeline vs regla de no-comentarios (ya en ledger de Task 1).
