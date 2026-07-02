@@ -42,7 +42,7 @@ export default function AppNavigator() {
       <Stack.Screen name="CreatePatient" component={CreatePatientScreen} options={{ title: 'Nuevo Paciente' }} />
       <Stack.Screen name="EditPatient" component={EditPatientScreen} options={{ title: 'Editar Paciente' }} />
       <Stack.Screen name="RecordVitals" component={RecordVitalsScreen} options={{ title: 'Registrar Signos Vitales' }} />
-      <Stack.Screen name="Medicamentos" component={DailyMedsScreen} options={{ title: 'Medicamentos de hoy' }} />
+      <Stack.Screen name="Medicamentos" component={DailyMedsScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Vitales" component={VitalsHistoryScreen} options={{ title: 'Signos Vitales' }} />
       <Stack.Screen name="Perfil" component={ProfileScreen} options={{ title: 'Perfil' }} />
       <Stack.Screen name="ComingSoon" component={ComingSoonScreen} options={{ headerShown: false }} />
