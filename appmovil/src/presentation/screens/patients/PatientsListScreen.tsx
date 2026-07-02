@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PatientStackParams } from '@/presentation/navigation/AppNavigator';
 import { useInjection } from '@/presentation/hooks/useInjection';
-import { Patient, MedicationLog } from '@/domain/entities';
+import { Patient } from '@/domain/entities';
 import { calcAge, nextPendingLog, needsAttention } from '@/domain/utils/patientDisplay';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
 
