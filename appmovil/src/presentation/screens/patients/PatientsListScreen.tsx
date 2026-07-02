@@ -5,27 +5,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PatientStackParams } from '@/presentation/navigation/AppNavigator';
 import { useInjection } from '@/presentation/hooks/useInjection';
 import { Patient, MedicationLog } from '@/domain/entities';
+import { calcAge, nextPendingLog, needsAttention } from '@/domain/utils/patientDisplay';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
 
 type Props = { navigation: NativeStackNavigationProp<PatientStackParams, 'Pacientes'> };
-
-function calcAge(birthDate: string): number {
-  const birth = new Date(birthDate);
-  const today = new Date();
-  return today.getFullYear() - birth.getFullYear() -
-    (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
-}
-
-function nextPendingLog(logs: MedicationLog[] | undefined): MedicationLog | undefined {
-  if (!logs) return undefined;
-  return logs
-    .filter((l) => l.status === 'PENDING')
-    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0];
-}
-
-function needsAttention(logs: MedicationLog[] | undefined): boolean {
-  return !!logs?.some((l) => l.status === 'ESCALATED' || l.status === 'MISSED');
-}
 
 type PatientCardProps = { patient: Patient; onPress: () => void };
 
