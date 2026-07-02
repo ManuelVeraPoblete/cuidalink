@@ -16,12 +16,12 @@ export class ApiMedicationRepository implements MedicationRepository {
   }
 
   async confirmLog(logId: string): Promise<MedicationLog> {
-    const res = await apiClient.post<MedicationLog>(`/medication-logs/${logId}/confirm`);
+    const res = await apiClient.patch<MedicationLog>(`/medication-logs/${logId}`, { status: 'CONFIRMED' });
     return res.data;
   }
 
   async missLog(logId: string): Promise<MedicationLog> {
-    const res = await apiClient.post<MedicationLog>(`/medication-logs/${logId}/miss`);
+    const res = await apiClient.patch<MedicationLog>(`/medication-logs/${logId}`, { status: 'MISSED' });
     return res.data;
   }
 }

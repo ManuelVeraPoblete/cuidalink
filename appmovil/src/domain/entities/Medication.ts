@@ -1,3 +1,5 @@
+export type MedicationType = 'TABLET' | 'CAPSULE' | 'INJECTION' | 'OTHER';
+
 export interface Medication {
   id: string;
   patientId: string;
@@ -5,5 +7,6 @@ export interface Medication {
   dosage: string;
   frequency: string;
   scheduledTimes: string[];
+  type: MedicationType;
   active: boolean;
 }

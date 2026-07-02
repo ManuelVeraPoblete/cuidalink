@@ -22,9 +22,9 @@ describe('calcAge', () => {
 
 describe('nextPendingLog', () => {
   const logs: MedicationLog[] = [
-    { id: '1', medicationId: 'm1', medicationName: 'Paracetamol', dosage: '500mg', scheduledAt: '2026-07-02T14:00:00Z', status: 'PENDING' },
-    { id: '2', medicationId: 'm2', medicationName: 'Ibuprofeno', dosage: '400mg', scheduledAt: '2026-07-02T09:00:00Z', status: 'PENDING' },
-    { id: '3', medicationId: 'm3', medicationName: 'Aspirina', dosage: '100mg', scheduledAt: '2026-07-02T08:00:00Z', status: 'CONFIRMED' },
+    { id: '1', medicationId: 'm1', medicationName: 'Paracetamol', dosage: '500mg', instructions: 'Take with water', type: 'TABLET', scheduledAt: '2026-07-02T14:00:00Z', status: 'PENDING' },
+    { id: '2', medicationId: 'm2', medicationName: 'Ibuprofeno', dosage: '400mg', instructions: 'Take with food', type: 'TABLET', scheduledAt: '2026-07-02T09:00:00Z', status: 'PENDING' },
+    { id: '3', medicationId: 'm3', medicationName: 'Aspirina', dosage: '100mg', instructions: 'Once daily', type: 'TABLET', scheduledAt: '2026-07-02T08:00:00Z', status: 'CONFIRMED' },
   ];
 
   it('retorna el log PENDING más próximo en el tiempo', () => {
@@ -42,7 +42,7 @@ describe('nextPendingLog', () => {
 
 describe('needsAttention', () => {
   const makeLog = (status: MedicationLog['status']): MedicationLog => ({
-    id: '1', medicationId: 'm1', medicationName: 'X', dosage: '1', scheduledAt: '2026-07-02T09:00:00Z', status,
+    id: '1', medicationId: 'm1', medicationName: 'X', dosage: '1', instructions: 'Take as needed', type: 'TABLET', scheduledAt: '2026-07-02T09:00:00Z', status,
   });
 
   it('retorna true cuando hay un log ESCALATED', () => {
