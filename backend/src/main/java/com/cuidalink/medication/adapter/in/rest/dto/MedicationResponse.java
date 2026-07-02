@@ -6,6 +6,7 @@ public record MedicationResponse(
     String name,
     String dosage,
     String instructions,
+    String type,
     MedicationScheduleDto schedule,
     boolean active
 ) {}

@@ -15,6 +15,7 @@ public class MedicationJpaEntity {
     private String dosage;
     private String instructions;
     private boolean active;
+    private String type;
 
     // Schedule fields — stored as primitives/strings for simplicity
     private String frequency;
@@ -41,6 +42,9 @@ public class MedicationJpaEntity {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
     public String getFrequency() { return frequency; }
     public void setFrequency(String frequency) { this.frequency = frequency; }

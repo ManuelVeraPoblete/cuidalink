@@ -3,14 +3,21 @@ package com.cuidalink;
 import com.cuidalink.auth.adapter.in.rest.dto.RegisterRequest;
 import com.cuidalink.auth.adapter.in.rest.dto.TokenResponse;
 import com.cuidalink.medication.adapter.in.rest.dto.CreateMedicationRequest;
+import com.cuidalink.medication.adapter.in.rest.dto.MedicationLogResponse;
 import com.cuidalink.medication.adapter.in.rest.dto.MedicationResponse;
 import com.cuidalink.medication.adapter.in.rest.dto.MedicationScheduleDto;
 import com.cuidalink.medication.domain.model.Frequency;
+import com.cuidalink.medication.domain.model.LogStatus;
+import com.cuidalink.medication.domain.model.MedicationId;
+import com.cuidalink.medication.domain.model.MedicationLog;
+import com.cuidalink.medication.domain.model.MedicationLogId;
+import com.cuidalink.medication.domain.port.out.MedicationLogRepository;
 import com.cuidalink.notification.domain.port.out.NotificationSender;
 import com.cuidalink.patient.adapter.in.rest.dto.CreatePatientRequest;
 import com.cuidalink.patient.adapter.in.rest.dto.EmergencyContactDto;
 import com.cuidalink.patient.adapter.in.rest.dto.PatientResponse;
 import com.cuidalink.patient.domain.model.Gender;
+import com.cuidalink.patient.domain.model.PatientId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +33,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +64,9 @@ class MedicationIntegrationTest {
 
     @MockBean
     NotificationSender notificationSender;
+
+    @Autowired
+    MedicationLogRepository medicationLogRepository;
 
     private HttpHeaders authHeaders;
     private String patientId;
@@ -149,5 +160,44 @@ class MedicationIntegrationTest {
         assertThat(listResp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(listResp.getBody()).isNotNull();
         assertThat(listResp.getBody()).hasSizeGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void getDailyLogs_includesMedicationDetails() {
+        var schedule = new MedicationScheduleDto(
+            List.of(LocalTime.of(8, 0)),
+            Frequency.DAILY,
+            List.of(),
+            LocalDate.now(),
+            null,
+            null
+        );
+        var medReq = new CreateMedicationRequest("Paracetamol", "1 tableta", "Después del desayuno", schedule);
+        var medEntity = new HttpEntity<>(medReq, authHeaders);
+        var medResp = restTemplate.postForEntity(
+            "/api/v1/patients/" + patientId + "/medications", medEntity, MedicationResponse.class);
+        assertThat(medResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(medResp.getBody().type()).isEqualTo("TABLET");
+        var medicationId = new MedicationId(UUID.fromString(medResp.getBody().id()));
+
+        var scheduledAt = LocalDateTime.now().withHour(8).withMinute(0).withSecond(0).withNano(0);
+        medicationLogRepository.save(new MedicationLog(
+            MedicationLogId.generate(), medicationId, new PatientId(UUID.fromString(patientId)),
+            scheduledAt, LogStatus.PENDING, null, null));
+
+        var logsResp = restTemplate.exchange(
+            "/api/v1/patients/" + patientId + "/medication-logs?date=" + LocalDate.now(),
+            HttpMethod.GET,
+            new HttpEntity<>(authHeaders),
+            MedicationLogResponse[].class
+        );
+
+        assertThat(logsResp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(logsResp.getBody()).hasSize(1);
+        var log = logsResp.getBody()[0];
+        assertThat(log.medicationName()).isEqualTo("Paracetamol");
+        assertThat(log.dosage()).isEqualTo("1 tableta");
+        assertThat(log.instructions()).isEqualTo("Después del desayuno");
+        assertThat(log.type()).isEqualTo("TABLET");
     }
 }

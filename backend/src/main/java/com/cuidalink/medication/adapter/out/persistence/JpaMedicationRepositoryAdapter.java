@@ -54,6 +54,7 @@ public class JpaMedicationRepositoryAdapter implements MedicationRepository {
         e.setDosage(m.getDosage());
         e.setInstructions(m.getInstructions());
         e.setActive(m.isActive());
+        e.setType(m.getType().name());
 
         MedicationSchedule s = m.getSchedule();
         if (s != null) {
@@ -76,6 +77,7 @@ public class JpaMedicationRepositoryAdapter implements MedicationRepository {
             e.getScheduleEndDate(),
             e.getScheduleIntervalDays()
         );
+        var type = e.getType() != null ? MedicationType.valueOf(e.getType()) : MedicationType.TABLET;
         return new Medication(
             new MedicationId(UUID.fromString(e.getId())),
             new PatientId(UUID.fromString(e.getPatientId())),
@@ -83,7 +85,8 @@ public class JpaMedicationRepositoryAdapter implements MedicationRepository {
             e.getDosage(),
             e.getInstructions(),
             schedule,
-            e.isActive()
+            e.isActive(),
+            type
         );
     }
 

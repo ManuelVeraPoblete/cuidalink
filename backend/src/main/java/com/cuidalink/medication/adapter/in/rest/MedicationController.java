@@ -127,6 +127,7 @@ public class MedicationController {
             m.getName(),
             m.getDosage(),
             m.getInstructions(),
+            m.getType().name(),
             schedDto,
             m.isActive()
         );
