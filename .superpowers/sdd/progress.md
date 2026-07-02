@@ -42,3 +42,38 @@ Task 3: complete (commits 85aab2d..0184d87, review clean — Minor: callEmergenc
 Task 4: complete (commits 0184d87..5466b94, review clean — Minor: duplicated handleEmergencyCall logic with ContactsScreen, and today-date recomputed each render; carry both to final review)
 
 Revisión final de rama: APROBADA (Ready to merge: Yes). 43/43 tests, tsc limpio. Fix aplicado post-revisión: import no usado MedicationLog en PatientsListScreen.tsx (commit 678c044). Resto de hallazgos Minor (duplicación de handleEmergencyCall/callEmergencyContact, today recalculado por render, aserción no-nula patient!) evaluados como diferibles, no bloqueantes.
+
+---
+
+# CuidaLink — Rediseño DailyMedsScreen (backend + mobile) — Ledger de Progreso
+
+Plan: docs/superpowers/plans/2026-07-02-daily-meds-screen-plan.md
+Rama: worktree-daily-meds-screen (worktree: .claude/worktrees/daily-meds-screen)
+Inicio: 2026-07-02
+Commit base: b1676f9
+
+Nota de entorno: Docker no está disponible en este entorno, por lo que los tests de integración
+backend (@Testcontainers, ej. MedicationIntegrationTest) no se pueden ejecutar aquí. Se verifican
+por compilación + revisión de código; el usuario deberá correrlos localmente donde haya Docker antes
+de mergear, o confiar en CI.
+
+Nota de bug pre-existente encontrado y corregido en main (commit b1676f9, ya traído a este worktree):
+el .gitignore raíz tenía una línea `out` genérica (boilerplate de Next.js, no aplica a este repo) que
+excluía silenciosamente 37 archivos del backend (todos los adapters/ports "out" del layer hexagonal)
+de git en TODO el repo. Ya arreglado antes de empezar esta feature.
+
+## Tasks
+- [x] Task 1: MedicationType + campo type en el dominio Medication
+- [ ] Task 2: Exponer type en la API y enriquecer los logs diarios
+- [x] Task 3: Mobile — entidades type/instructions y corregir confirmar/omitir
+- [x] Task 4: MedicationActionModal (nuevo)
+- [ ] Task 5: Rediseñar MedicationCard
+- [ ] Task 6: Rediseñar DailyMedsScreen
+
+Task 1: complete (commits b1676f9..eb86e82, review clean — Minor: convenience-constructor Javadoc borderline vs no-comments rule, non-blocking)
+
+Task 2: complete (commits eb86e82..b2b7d64, review clean — MedicationIntegrationTest.getDailyLogs_includesMedicationDetails NOT executed here, Docker unavailable; needs a run locally/CI before merge. Minor: getDailyLogs fetches full medication list rather than a narrower batch, and toResponse assumes medication always present in map — both acceptable, non-blocking)
+
+Task 3: complete (commits b2b7d64..94578d2, review clean — also touched patientDisplay.test.ts, verified mechanical fixture-only ripple from new required MedicationLog fields. Minor/out-of-scope: Medication.ts frequency/scheduledTimes fields don't match backend's nested schedule DTO shape, pre-existing bug unrelated to this feature, flag for future task)
+
+Task 4: complete (commits 94578d2..7f14d94, review clean — Reviewer's cannot-verify item on Intl/es-CL support resolved by controller: same toLocaleTimeString('es-CL',...) pattern already used and working elsewhere in the app. Minor: null-log mid-visible transition skips fade animation, non-blocking, noted for Task 6 wiring)

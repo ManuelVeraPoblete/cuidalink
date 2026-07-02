@@ -1,11 +1,9 @@
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInjection } from '@/presentation/hooks/useInjection';
 import { useAuthStore } from '@/presentation/stores/authStore';
 import { MedicationLog } from '@/domain/entities';
 import MedicationCard from '@/presentation/components/MedicationCard';
-import MedicationActionModal from '@/presentation/components/MedicationActionModal';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
 
 export default function DailyMedsScreen() {
@@ -13,8 +11,6 @@ export default function DailyMedsScreen() {
   const selectedPatientId = useAuthStore((s) => s.selectedPatientId);
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
-  const [selectedLog, setSelectedLog] = useState<MedicationLog | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['medication-logs', selectedPatientId, today],
@@ -27,26 +23,15 @@ export default function DailyMedsScreen() {
 
   const confirmMutation = useMutation({
     mutationFn: (logId: string) => medicationRepo.confirmLog(logId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['medication-logs'] });
-      setModalVisible(false);
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['medication-logs'] }),
     onError: () => Alert.alert('Error', 'No se pudo confirmar la dosis.'),
   });
 
   const missMutation = useMutation({
     mutationFn: (logId: string) => medicationRepo.missLog(logId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['medication-logs'] });
-      setModalVisible(false);
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['medication-logs'] }),
     onError: () => Alert.alert('Error', 'No se pudo marcar la dosis.'),
   });
-
-  const handleCardPress = (log: MedicationLog) => {
-    setSelectedLog(log);
-    setModalVisible(true);
-  };
 
   if (!selectedPatientId) {
     return (
@@ -68,20 +53,10 @@ export default function DailyMedsScreen() {
           data={data}
           keyExtractor={(i: MedicationLog) => i.id}
           renderItem={({ item }) => (
-            <MedicationCard
-              log={item}
-              onPress={() => handleCardPress(item)}
-            />
+            <MedicationCard log={item} />
           )}
           ListEmptyComponent={<Text style={styles.empty}>Sin medicamentos programados para hoy.</Text>}
           contentContainerStyle={{ padding: 16 }}
-        />
-        <MedicationActionModal
-          visible={modalVisible}
-          log={selectedLog}
-          onConfirm={() => selectedLog && confirmMutation.mutate(selectedLog.id)}
-          onMiss={() => selectedLog && missMutation.mutate(selectedLog.id)}
-          onClose={() => setModalVisible(false)}
         />
       </View>
     </ScreenBackground>
