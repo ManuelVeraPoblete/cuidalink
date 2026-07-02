@@ -73,6 +73,18 @@ class MedicationServiceTest {
     }
 
     @Test
+    void createMedication_defaultsTypeToTablet() {
+        var patient = buildPatient(ownerId);
+        when(patientRepository.findById(patient.getId())).thenReturn(Optional.of(patient));
+        when(medicationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        var result = sut.execute(new CreateMedicationUseCase.CreateMedicationCommand(
+            patient.getId(), "Metformina", "500mg", "Con comida", schedule, ownerId));
+
+        assertThat(result.getType()).isEqualTo(MedicationType.TABLET);
+    }
+
+    @Test
     void confirmLog_collaboratorCanConfirmPendingLog() {
         var collaborator = new UserId(UUID.randomUUID());
         var medicationId = MedicationId.generate();

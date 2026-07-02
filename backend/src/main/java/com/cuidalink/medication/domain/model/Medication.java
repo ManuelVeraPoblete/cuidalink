@@ -11,9 +11,11 @@ public class Medication {
     private String instructions;
     private MedicationSchedule schedule;
     private boolean active;
+    private final MedicationType type;
 
     public Medication(MedicationId id, PatientId patientId, String name, String dosage,
-                      String instructions, MedicationSchedule schedule, boolean active) {
+                      String instructions, MedicationSchedule schedule, boolean active,
+                      MedicationType type) {
         this.id = id;
         this.patientId = patientId;
         this.name = name;
@@ -21,6 +23,13 @@ public class Medication {
         this.instructions = instructions;
         this.schedule = schedule;
         this.active = active;
+        this.type = type;
+    }
+
+    /** Convenience constructor for callers that don't set a type yet — defaults to TABLET. */
+    public Medication(MedicationId id, PatientId patientId, String name, String dosage,
+                      String instructions, MedicationSchedule schedule, boolean active) {
+        this(id, patientId, name, dosage, instructions, schedule, active, MedicationType.TABLET);
     }
 
     public void update(String name, String dosage, String instructions, MedicationSchedule schedule) {
@@ -39,4 +48,5 @@ public class Medication {
     public String getInstructions() { return instructions; }
     public MedicationSchedule getSchedule() { return schedule; }
     public boolean isActive() { return active; }
+    public MedicationType getType() { return type; }
 }
