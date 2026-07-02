@@ -13,5 +13,13 @@ public record MedicationScheduleDto(
     List<DayOfWeek> daysOfWeek,
     LocalDate startDate,
     LocalDate endDate,
-    Integer intervalDays
-) {}
+    Integer intervalDays,
+    LocalTime startTime,
+    Integer frequencyHours
+) {
+
+    public MedicationScheduleDto(List<LocalTime> times, Frequency frequency, List<DayOfWeek> daysOfWeek,
+                                 LocalDate startDate, LocalDate endDate, Integer intervalDays) {
+        this(times, frequency, daysOfWeek, startDate, endDate, intervalDays, null, null);
+    }
+}

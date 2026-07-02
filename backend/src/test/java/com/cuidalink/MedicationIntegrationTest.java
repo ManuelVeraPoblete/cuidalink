@@ -200,4 +200,33 @@ class MedicationIntegrationTest {
         assertThat(log.instructions()).isEqualTo("Después del desayuno");
         assertThat(log.type()).isEqualTo("TABLET");
     }
+
+    @Test
+    void createMedication_withDailyInterval_computesTimesAndPersistsFields() {
+        var schedule = new MedicationScheduleDto(
+            null, null, null, LocalDate.now(), null, null,
+            LocalTime.of(8, 0), 8
+        );
+        var req = new CreateMedicationRequest("Ibuprofeno", "400mg", "Con alimentos", schedule);
+        var entity = new HttpEntity<>(req, authHeaders);
+
+        var response = restTemplate.postForEntity(
+            "/api/v1/patients/" + patientId + "/medications", entity, MedicationResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody().schedule().times()).containsExactly(
+            LocalTime.of(8, 0), LocalTime.of(16, 0), LocalTime.of(0, 0));
+        assertThat(response.getBody().schedule().startTime()).isEqualTo(LocalTime.of(8, 0));
+        assertThat(response.getBody().schedule().frequencyHours()).isEqualTo(8);
+
+        var getResp = restTemplate.exchange(
+            "/api/v1/patients/" + patientId + "/medications/" + response.getBody().id(),
+            HttpMethod.GET,
+            new HttpEntity<>(authHeaders),
+            MedicationResponse.class
+        );
+
+        assertThat(getResp.getBody().schedule().startTime()).isEqualTo(LocalTime.of(8, 0));
+        assertThat(getResp.getBody().schedule().frequencyHours()).isEqualTo(8);
+    }
 }

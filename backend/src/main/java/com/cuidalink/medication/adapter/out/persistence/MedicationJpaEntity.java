@@ -24,6 +24,8 @@ public class MedicationJpaEntity {
     private LocalDate scheduleStartDate;
     private LocalDate scheduleEndDate;
     private Integer scheduleIntervalDays;
+    private String scheduleStartTime;
+    private Integer scheduleFrequencyHours;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -63,4 +65,10 @@ public class MedicationJpaEntity {
 
     public Integer getScheduleIntervalDays() { return scheduleIntervalDays; }
     public void setScheduleIntervalDays(Integer scheduleIntervalDays) { this.scheduleIntervalDays = scheduleIntervalDays; }
+
+    public String getScheduleStartTime() { return scheduleStartTime; }
+    public void setScheduleStartTime(String scheduleStartTime) { this.scheduleStartTime = scheduleStartTime; }
+
+    public Integer getScheduleFrequencyHours() { return scheduleFrequencyHours; }
+    public void setScheduleFrequencyHours(Integer scheduleFrequencyHours) { this.scheduleFrequencyHours = scheduleFrequencyHours; }
 }

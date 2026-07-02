@@ -64,6 +64,8 @@ public class JpaMedicationRepositoryAdapter implements MedicationRepository {
             e.setScheduleStartDate(s.startDate());
             e.setScheduleEndDate(s.endDate());
             e.setScheduleIntervalDays(s.intervalDays());
+            e.setScheduleStartTime(s.startTime() != null ? s.startTime().toString() : null);
+            e.setScheduleFrequencyHours(s.frequencyHours());
         }
         return e;
     }
@@ -75,7 +77,9 @@ public class JpaMedicationRepositoryAdapter implements MedicationRepository {
             daysFromString(e.getScheduleDaysOfWeek()),
             e.getScheduleStartDate(),
             e.getScheduleEndDate(),
-            e.getScheduleIntervalDays()
+            e.getScheduleIntervalDays(),
+            e.getScheduleStartTime() != null ? LocalTime.parse(e.getScheduleStartTime()) : null,
+            e.getScheduleFrequencyHours()
         );
         var type = e.getType() != null ? MedicationType.valueOf(e.getType()) : MedicationType.TABLET;
         return new Medication(

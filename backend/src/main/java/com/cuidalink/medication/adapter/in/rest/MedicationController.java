@@ -103,6 +103,11 @@ public class MedicationController {
     // ---- Helpers ----
 
     private MedicationSchedule toScheduleDomain(MedicationScheduleDto dto) {
+        boolean hasExplicitTimes = dto.times() != null && !dto.times().isEmpty();
+        if (!hasExplicitTimes && dto.startTime() != null && dto.frequencyHours() != null) {
+            return MedicationSchedule.fromDailyInterval(
+                dto.startTime(), dto.frequencyHours(), dto.startDate(), dto.endDate());
+        }
         return new MedicationSchedule(
             dto.times() != null ? dto.times() : List.of(),
             dto.frequency(),
@@ -118,7 +123,8 @@ public class MedicationController {
         if (m.getSchedule() != null) {
             var s = m.getSchedule();
             schedDto = new MedicationScheduleDto(
-                s.times(), s.frequency(), s.daysOfWeek(), s.startDate(), s.endDate(), s.intervalDays()
+                s.times(), s.frequency(), s.daysOfWeek(), s.startDate(), s.endDate(), s.intervalDays(),
+                s.startTime(), s.frequencyHours()
             );
         }
         return new MedicationResponse(
