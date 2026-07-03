@@ -10,6 +10,7 @@ import TodayScreen from '@/presentation/screens/medications/TodayScreen';
 import VitalsHistoryScreen from '@/presentation/screens/vitals/VitalsHistoryScreen';
 import RecordVitalsScreen from '@/presentation/screens/vitals/RecordVitalsScreen';
 import ProfileScreen from '@/presentation/screens/profile/ProfileScreen';
+import EditProfileScreen from '@/presentation/screens/profile/EditProfileScreen';
 import ComingSoonScreen from '@/presentation/screens/common/ComingSoonScreen';
 import ContactsScreen from '@/presentation/screens/patients/ContactsScreen';
 
@@ -50,6 +51,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Medicamentos" component={DailyMedsScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Vitales" component={VitalsHistoryScreen} options={{ title: 'Signos Vitales' }} />
       <Stack.Screen name="Perfil" component={ProfileScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Editar Perfil' }} />
       <Stack.Screen name="ComingSoon" component={ComingSoonScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Contacts" component={ContactsScreen} options={{ headerShown: false }} />
       <Stack.Screen name="CreateMedication" component={CreateMedicationScreen} options={{ headerShown: false }} />
