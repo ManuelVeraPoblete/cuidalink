@@ -3,6 +3,7 @@ package com.cuidalink.auth.domain.service;
 
 import com.cuidalink.auth.domain.model.*;
 import com.cuidalink.auth.domain.port.in.RegisterUserUseCase.RegisterUserCommand;
+import com.cuidalink.auth.domain.port.in.UpdateProfileUseCase;
 import com.cuidalink.auth.domain.port.out.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,5 +88,59 @@ class AuthServiceTest {
 
         verify(userRepository).save(argThat(u -> u.getFcmToken() != null &&
             u.getFcmToken().value().equals("new-fcm-token")));
+    }
+
+    @Test
+    void updateProfile_updatesAllFieldsAndReturnsUser() {
+        var userId = new UserId(java.util.UUID.randomUUID());
+        var user = new User(userId, "Ana", new Email("ana@test.com"), "hashed");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        var command = new UpdateProfileUseCase.UpdateProfileCommand(
+            "Ana López", "ana@test.com", "+56912345678", "Av. Siempre Viva 123",
+            "Cuidado geriátrico", "5 años");
+
+        var updated = sut.execute(userId, command);
+
+        assertThat(updated.getName()).isEqualTo("Ana López");
+        assertThat(updated.getPhone()).isEqualTo("+56912345678");
+        assertThat(updated.getAddress()).isEqualTo("Av. Siempre Viva 123");
+        assertThat(updated.getSpecialty()).isEqualTo("Cuidado geriátrico");
+        assertThat(updated.getExperience()).isEqualTo("5 años");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateProfile_allowsKeepingSameEmail() {
+        var userId = new UserId(java.util.UUID.randomUUID());
+        var user = new User(userId, "Ana", new Email("ana@test.com"), "hashed");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        var command = new UpdateProfileUseCase.UpdateProfileCommand(
+            "Ana", "ana@test.com", null, null, null, null);
+
+        var updated = sut.execute(userId, command);
+
+        assertThat(updated.getEmail().value()).isEqualTo("ana@test.com");
+        verify(userRepository, never()).findByEmail(any());
+    }
+
+    @Test
+    void updateProfile_throwsWhenEmailUsedByAnotherUser() {
+        var userId = new UserId(java.util.UUID.randomUUID());
+        var user = new User(userId, "Ana", new Email("ana@test.com"), "hashed");
+        var otherUser = new User(new UserId(java.util.UUID.randomUUID()), "Pedro",
+            new Email("pedro@test.com"), "hashed2");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("pedro@test.com")).thenReturn(Optional.of(otherUser));
+
+        var command = new UpdateProfileUseCase.UpdateProfileCommand(
+            "Ana", "pedro@test.com", null, null, null, null);
+
+        assertThatThrownBy(() -> sut.execute(userId, command))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("ya está en uso");
     }
 }

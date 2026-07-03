@@ -6,7 +6,7 @@ import com.cuidalink.auth.domain.port.out.*;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService implements RegisterUserUseCase, LoginUserUseCase, UpdateFcmTokenUseCase {
+public class AuthService implements RegisterUserUseCase, LoginUserUseCase, UpdateFcmTokenUseCase, UpdateProfileUseCase {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -49,5 +49,21 @@ public class AuthService implements RegisterUserUseCase, LoginUserUseCase, Updat
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         user.updateFcmToken(new FcmToken(fcmToken));
         userRepository.save(user);
+    }
+
+    @Override
+    public User execute(UserId userId, UpdateProfileCommand command) {
+        var user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        if (!command.email().equals(user.getEmail().value())) {
+            userRepository.findByEmail(command.email()).ifPresent(existing -> {
+                if (!existing.getId().equals(userId)) {
+                    throw new IllegalStateException("Este correo ya está en uso");
+                }
+            });
+        }
+        user.updateProfile(command.name(), new Email(command.email()), command.phone(),
+            command.address(), command.specialty(), command.experience());
+        return userRepository.save(user);
     }
 }
