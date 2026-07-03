@@ -33,6 +33,9 @@ class AuthControllerTest {
     @MockBean
     UpdateFcmTokenUseCase fcmTokenUseCase;
 
+    @MockBean
+    UpdateProfileUseCase updateProfileUseCase;
+
     // JwtAuthFilter dependencies — mocked so the filter can instantiate
     @MockBean
     JwtProvider jwtProvider;

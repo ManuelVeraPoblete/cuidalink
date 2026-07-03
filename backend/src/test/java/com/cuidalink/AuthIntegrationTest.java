@@ -1,5 +1,6 @@
 package com.cuidalink;
 
+import com.cuidalink.auth.adapter.in.rest.dto.AuthResponse;
 import com.cuidalink.auth.adapter.in.rest.dto.RegisterRequest;
 import com.cuidalink.auth.adapter.in.rest.dto.TokenResponse;
 import com.cuidalink.notification.domain.port.out.NotificationSender;
@@ -66,5 +67,56 @@ class AuthIntegrationTest {
 
         assertThat(second.getStatusCode().is4xxClientError() ||
                    second.getStatusCode().is5xxServerError()).isTrue();
+    }
+
+    @Test
+    void updateProfile_persistsChangesAndReflectsInMe() {
+        var registerReq = new RegisterRequest("Carla Soto", "carla@integration.com", "password123");
+        ResponseEntity<TokenResponse> registerResponse = restTemplate.postForEntity(
+            "/api/v1/auth/register", registerReq, TokenResponse.class);
+        String token = registerResponse.getBody().token();
+
+        var headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        var patchBody = """
+            {"name":"Carla Soto Pérez","email":"carla@integration.com","phone":"+56912345678",
+             "address":"Av. Siempre Viva 123","specialty":"Cuidado geriátrico","experience":"5 años"}
+            """;
+        var patchEntity = new HttpEntity<>(patchBody, headers);
+
+        ResponseEntity<AuthResponse> patchResponse = restTemplate.exchange(
+            "/api/v1/auth/me", HttpMethod.PATCH, patchEntity, AuthResponse.class);
+
+        assertThat(patchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(patchResponse.getBody().phone()).isEqualTo("+56912345678");
+        assertThat(patchResponse.getBody().specialty()).isEqualTo("Cuidado geriátrico");
+
+        var getEntity = new HttpEntity<>(headers);
+        ResponseEntity<AuthResponse> getResponse = restTemplate.exchange(
+            "/api/v1/auth/me", HttpMethod.GET, getEntity, AuthResponse.class);
+        assertThat(getResponse.getBody().address()).isEqualTo("Av. Siempre Viva 123");
+    }
+
+    @Test
+    void updateProfile_duplicateEmail_returns409() {
+        restTemplate.postForEntity("/api/v1/auth/register",
+            new RegisterRequest("Usuario Uno", "uno@integration.com", "password123"), TokenResponse.class);
+        var registerTwo = restTemplate.postForEntity("/api/v1/auth/register",
+            new RegisterRequest("Usuario Dos", "dos@integration.com", "password123"), TokenResponse.class);
+        String tokenTwo = registerTwo.getBody().token();
+
+        var headers = new HttpHeaders();
+        headers.setBearerAuth(tokenTwo);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        var patchBody = """
+            {"name":"Usuario Dos","email":"uno@integration.com"}
+            """;
+        var patchEntity = new HttpEntity<>(patchBody, headers);
+
+        ResponseEntity<Object> response = restTemplate.exchange(
+            "/api/v1/auth/me", HttpMethod.PATCH, patchEntity, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 }

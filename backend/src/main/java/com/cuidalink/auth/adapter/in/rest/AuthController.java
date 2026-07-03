@@ -15,27 +15,26 @@ public class AuthController {
     private final RegisterUserUseCase registerUseCase;
     private final LoginUserUseCase loginUseCase;
     private final UpdateFcmTokenUseCase fcmTokenUseCase;
+    private final UpdateProfileUseCase updateProfileUseCase;
 
-    public AuthController(RegisterUserUseCase r, LoginUserUseCase l, UpdateFcmTokenUseCase f) {
+    public AuthController(RegisterUserUseCase r, LoginUserUseCase l, UpdateFcmTokenUseCase f,
+                           UpdateProfileUseCase u) {
         this.registerUseCase = r;
         this.loginUseCase = l;
         this.fcmTokenUseCase = f;
+        this.updateProfileUseCase = u;
     }
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@Validated @RequestBody RegisterRequest req) {
-        System.out.println(">>> REGISTER name=" + req.name() + " email=" + req.email());
         String token = registerUseCase.execute(
             new RegisterUserUseCase.RegisterUserCommand(req.name(), req.email(), req.password()));
-        System.out.println(">>> REGISTER OK");
         return ResponseEntity.ok(new TokenResponse(token));
     }
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Validated @RequestBody LoginRequest req) {
-        System.out.println(">>> LOGIN email=" + req.email() + " password=" + req.password());
         String token = loginUseCase.login(req.email(), req.password());
-        System.out.println(">>> LOGIN OK");
         return ResponseEntity.ok(new TokenResponse(token));
     }
 
@@ -51,8 +50,17 @@ public class AuthController {
         return ResponseEntity.ok(toResponse(user));
     }
 
+    @PatchMapping("/me")
+    public ResponseEntity<AuthResponse> updateMe(@AuthenticationPrincipal User user,
+                                                  @Validated @RequestBody UpdateProfileRequest req) {
+        var updated = updateProfileUseCase.execute(user.getId(),
+            new UpdateProfileUseCase.UpdateProfileCommand(
+                req.name(), req.email(), req.phone(), req.address(), req.specialty(), req.experience()));
+        return ResponseEntity.ok(toResponse(updated));
+    }
+
     private AuthResponse toResponse(User u) {
-        return new AuthResponse(u.getId().value().toString(), u.getName(),
-            u.getEmail().value(), u.getRole().name());
+        return new AuthResponse(u.getId().value().toString(), u.getName(), u.getEmail().value(),
+            u.getRole().name(), u.getPhone(), u.getAddress(), u.getSpecialty(), u.getExperience());
     }
 }

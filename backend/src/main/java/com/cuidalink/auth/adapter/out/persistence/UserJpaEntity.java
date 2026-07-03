@@ -14,6 +14,10 @@ public class UserJpaEntity {
     private String passwordHash;
     private String fcmToken;
     private String role;
+    private String phone;
+    private String address;
+    private String specialty;
+    private String experience;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -27,4 +31,12 @@ public class UserJpaEntity {
     public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    public String getSpecialty() { return specialty; }
+    public void setSpecialty(String specialty) { this.specialty = specialty; }
+    public String getExperience() { return experience; }
+    public void setExperience(String experience) { this.experience = experience; }
 }

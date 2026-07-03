@@ -37,6 +37,10 @@ public class JpaUserRepositoryAdapter implements UserRepository {
         e.setPasswordHash(u.getPasswordHash());
         e.setFcmToken(u.getFcmToken() != null ? u.getFcmToken().value() : null);
         e.setRole(u.getRole().name());
+        e.setPhone(u.getPhone());
+        e.setAddress(u.getAddress());
+        e.setSpecialty(u.getSpecialty());
+        e.setExperience(u.getExperience());
         return e;
     }
 
@@ -49,6 +53,8 @@ public class JpaUserRepositoryAdapter implements UserRepository {
             UserRole.valueOf(e.getRole())
         );
         if (e.getFcmToken() != null) user.updateFcmToken(new FcmToken(e.getFcmToken()));
+        user.updateProfile(e.getName(), new Email(e.getEmail()), e.getPhone(), e.getAddress(),
+            e.getSpecialty(), e.getExperience());
         return user;
     }
 }
