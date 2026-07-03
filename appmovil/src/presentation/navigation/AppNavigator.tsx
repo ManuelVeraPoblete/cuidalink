@@ -5,6 +5,7 @@ import PatientDetailScreen from '@/presentation/screens/patients/PatientDetailSc
 import CreatePatientScreen from '@/presentation/screens/patients/CreatePatientScreen';
 import EditPatientScreen from '@/presentation/screens/patients/EditPatientScreen';
 import DailyMedsScreen from '@/presentation/screens/medications/DailyMedsScreen';
+import CreateMedicationScreen from '@/presentation/screens/medications/CreateMedicationScreen';
 import VitalsHistoryScreen from '@/presentation/screens/vitals/VitalsHistoryScreen';
 import RecordVitalsScreen from '@/presentation/screens/vitals/RecordVitalsScreen';
 import ProfileScreen from '@/presentation/screens/profile/ProfileScreen';
@@ -23,6 +24,7 @@ export type PatientStackParams = {
   Perfil: undefined;
   ComingSoon: { title: string; subtitle: string };
   Contacts: { patientId: string };
+  CreateMedication: undefined;
 };
 
 const Stack = createNativeStackNavigator<PatientStackParams>();
@@ -47,6 +49,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Perfil" component={ProfileScreen} options={{ title: 'Perfil' }} />
       <Stack.Screen name="ComingSoon" component={ComingSoonScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Contacts" component={ContactsScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="CreateMedication" component={CreateMedicationScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

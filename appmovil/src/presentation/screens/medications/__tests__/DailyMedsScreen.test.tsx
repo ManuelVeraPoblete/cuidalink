@@ -89,12 +89,9 @@ describe('DailyMedsScreen', () => {
     await waitFor(() => expect(confirmLog).toHaveBeenCalledWith('l1'));
   });
 
-  it('navega a ComingSoon al presionar "Agregar medicamento"', async () => {
+  it('navega a CreateMedication al presionar "Agregar medicamento"', async () => {
     const { navigation } = renderScreen([]);
     fireEvent.press(await screen.findByText('Agregar medicamento'));
-    expect(navigation.navigate).toHaveBeenCalledWith('ComingSoon', {
-      title: 'Agregar medicamento',
-      subtitle: 'Registrar un nuevo medicamento',
-    });
+    expect(navigation.navigate).toHaveBeenCalledWith('CreateMedication');
   });
 });

@@ -143,12 +143,7 @@ export default function DailyMedsScreen({ navigation }: Props) {
         ListFooterComponent={
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() =>
-              navigation.navigate('ComingSoon', {
-                title: 'Agregar medicamento',
-                subtitle: 'Registrar un nuevo medicamento',
-              })
-            }
+            onPress={() => navigation.navigate('CreateMedication')}
           >
             <Ionicons name="add-circle-outline" size={20} color="#fff" />
             <Text style={styles.addButtonText}>Agregar medicamento</Text>
