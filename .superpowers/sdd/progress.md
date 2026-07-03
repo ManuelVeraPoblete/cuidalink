@@ -147,3 +147,32 @@ Commit base: 7b75914
 Task 1: complete (commits 7b75914..6651f1b, review clean, sin hallazgos)
 
 Revisión final de rama: no se despachó por separado — plan de 1 sola tarea trabajado directo en main (sin rama/worktree), la revisión de Task 1 ya cubrió todo el diff. 68/68 tests, tsc limpio.
+
+---
+
+# CuidaLink — Pantalla de Perfil del Cuidador — Ledger de Progreso
+
+Plan: docs/superpowers/plans/2026-07-03-caregiver-profile-screen-plan.md
+Rama: main (sin worktree, decisión explícita del usuario)
+Inicio: 2026-07-03
+Commit base: 35103dd
+
+## Tasks
+- [x] Task 1: Backend — User.updateProfile + UpdateProfileUseCase (dominio puro)
+- [x] Task 2: Backend — persistencia + endpoint PATCH /auth/me
+- [x] Task 3: Mobile — User entity + AuthRepository.updateProfile
+- [x] Task 4: Mobile — Rediseñar ProfileScreen.tsx
+- [x] Task 5: Mobile — EditProfileScreen.tsx + navegación
+
+Task 1: complete (commits 35103dd..9abb8bc, review clean, no findings)
+
+Task 2: complete (commits 9abb8bc..e873f97, review clean después de fix — Critical encontrado: los 2 casos nuevos de AuthIntegrationTest usaban HttpMethod.PATCH vía TestRestTemplate, pero el classpath no tenía HttpClient5/Jetty/OkHttp, así que caía a SimpleClientHttpRequestFactory (JDK HttpURLConnection), que no soporta PATCH y lanza ProtocolException — ambos tests habrían fallado antes de llegar al servidor, independiente de Docker/lógica de negocio. Fix: agregada dependencia de test httpclient5 (sin versión explícita, heredada del BOM de spring-boot-starter-parent). Re-revisión confirmó resuelto, sin regresiones. AuthIntegrationTest sigue sin poder ejecutarse aquí (Docker no disponible), trazado a mano y confirmado correcto por el revisor.
+
+Task 3: complete (commits e873f97..a1c152c, review clean, no findings — también tocó LoginUseCase.test.ts, verificado como ripple mecánico inevitable: el mock de AuthRepository necesitaba role/updateProfile para seguir tipando, sin cambios de comportamiento)
+
+Task 4: complete (commits a1c152c..8f14fc2, review clean, no findings — implementador corrigió un bug menor del propio brief: el test asumía getByText('Manuel Vera') pero el nombre aparece dos veces por diseño (tarjeta + fila "Nombre"), cambiado a getAllByText, confirmado legítimo por el revisor)
+
+Task 5: complete (commits 8f14fc2..9226f29, review clean — desviación del brief investigada y aprobada: el mock compartido __mocks__/axios.ts no implementa isAxiosError, así que axios.isAxiosError(err) del brief siempre daría false en tests; implementador reemplazó por un type guard local isAxiosErrorWithStatus, confinado a EditProfileScreen.tsx, verificado equivalente en producción. Minor no bloqueante: al guard local le falta un comentario "why", cosmético.)
+
+Revisión final de rama: APROBADA (Ready to merge: Yes). Contratos cruzados verificados extremo a extremo: forma de AuthResponse ↔ User mobile coincide campo a campo, teléfono round-tripea consistente (+56 canónico, EditProfileScreen strip/prefix correcto), ruta EditProfile funciona (tipo de Task 4 + registro de Task 5 juntos), 409 de correo duplicado funciona en las 3 capas. Backend: `mvn test -Dtest='!*IntegrationTest' -q` verde. Mobile: 78/78 tests, tsc limpio. Sin hallazgos Critical/Important.
+Minor (no bloqueantes, para el usuario): (1) al sacar el generador de informe PDF de ProfileScreen, la función queda huérfana en TODA la app — DateRangePicker.tsx sin referentes, downloadReportUseCase/reportRepo siguen instanciados en useInjection sin consumidor; backend/ApiReportRepository siguen existiendo pero inalcanzables desde la UI. Decisión pendiente del usuario: borrar el código muerto o dejarlo aparcado para una futura reubicación. (2) __mocks__/axios.ts (compartido) no tiene isAxiosError ni patch — causó la desviación de Task 5, gap latente para futuros tests de data/repositories. (3) warning de act() en ProfileScreen.test.tsx:36 (setState de Zustand fuera de act en afterEach) — cosmético, no afecta resultados.
