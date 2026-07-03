@@ -115,3 +115,19 @@ Task 4: complete (commits 49b1948..3e298b9, review clean after fix — Important
 
 Revisión final de rama: APROBADA (Ready to merge: Yes). Ambos test suites limpios: mobile RNTL (nuevo patrón de mock para DateTimePicker establecido), backend compila + tests no-Testcontainers verdes. El test de integración nuevo (Docker no disponible aquí) fue trazado línea por línea por el revisor final y confirmado correcto.
 Sin hallazgos Critical/Important. Los 5 hallazgos Minor llevados de las revisiones por tarea quedan todos diferidos (no bloqueantes): sin test de borde frequencyHours=24, startTime persistido como String (consistente con patrón existente), onSubmit sin feedback si falta selectedPatientId (inalcanzable en la práctica), botón Cancelar no se deshabilita durante el guardado, y DateTimePicker relee la fecha guardada vía new Date() que puede desplegar mal el calendario en timezones negativos al reabrir (solo visual, no corrompe el dato ya que el path de escritura fue corregido en Task 4).
+
+---
+
+# CuidaLink — Pantalla "Hoy" (TodayScreen) — Ledger de Progreso
+
+Plan: docs/superpowers/plans/2026-07-03-today-screen-plan.md
+Rama: main (sin worktree, decisión explícita del usuario dado el tamaño chico de este plan)
+Inicio: 2026-07-03
+Commit base: aaf3194
+
+## Tasks
+- [x] Task 1: TodayScreen + navegación desde PatientDetailScreen
+
+Task 1: complete (commits aaf3194..4894e60, review clean, no Critical/Important findings). Minor: header block duplicated with DailyMedsScreen.tsx (task explicitly forbade touching that file, so unavoidable here; candidate for a future shared-header extraction), no test for missLog/'Omitir' path or no-selectedPatientId hint (brief's own test file didn't include these, not implementer's gap)
+
+Revisión final de rama: no se despachó por separado — plan de 1 sola tarea trabajado directo en main (sin rama/worktree), la revisión de Task 1 ya cubrió todo el diff. 68/68 tests, tsc limpio.
