@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import apiClient from '@/data/http/apiClient';
-import { AuthRepository } from '@/domain/repositories/AuthRepository';
+import { AuthRepository, UpdateProfileData } from '@/domain/repositories/AuthRepository';
 import { User } from '@/domain/entities';
 
 export class ApiAuthRepository implements AuthRepository {
@@ -28,6 +28,11 @@ export class ApiAuthRepository implements AuthRepository {
 
   async getMe(): Promise<User> {
     const res = await apiClient.get<User>('/auth/me');
+    return res.data;
+  }
+
+  async updateProfile(data: UpdateProfileData): Promise<User> {
+    const res = await apiClient.patch<User>('/auth/me', data);
     return res.data;
   }
 }

@@ -2,7 +2,7 @@ import { LoginUseCaseImpl } from '../LoginUseCase';
 import { AuthRepository } from '@/domain/repositories/AuthRepository';
 import { User } from '@/domain/entities';
 
-const mockUser: User = { id: '1', name: 'Ana', email: 'ana@test.com' };
+const mockUser: User = { id: '1', name: 'Ana', email: 'ana@test.com', role: 'CAREGIVER' };
 
 const mockRepo: jest.Mocked<AuthRepository> = {
   loginWithEmail: jest.fn(),
@@ -10,6 +10,7 @@ const mockRepo: jest.Mocked<AuthRepository> = {
   logout: jest.fn(),
   getMe: jest.fn(),
   updateFcmToken: jest.fn(),
+  updateProfile: jest.fn(),
 };
 
 describe('LoginUseCase', () => {
