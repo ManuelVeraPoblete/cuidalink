@@ -57,20 +57,6 @@ export default function HomeScreen() {
             onPress={() => navigation.navigate('Pacientes')}
           />
           <HomeCard
-            icon={require('../../../../assets/icons/medicamentos-pildora.png')}
-            label="Medicamentos de hoy"
-            onPress={() => navigation.navigate('Medicamentos')}
-          />
-          <HomeCard
-            icon={require('../../../../assets/icons/signos-vitales.png')}
-            label="Signos vitales"
-            onPress={() => navigation.navigate('Vitales')}
-          />
-          <HomeCard
-            icon={require('../../../../assets/icons/observaciones.png')}
-            label="Observaciones"
-          />
-          <HomeCard
             icon={require('../../../../assets/icons/perfil.png')}
             label="Perfil"
             onPress={() => navigation.navigate('Perfil')}
