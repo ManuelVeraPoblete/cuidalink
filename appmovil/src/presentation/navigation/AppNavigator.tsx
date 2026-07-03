@@ -27,6 +27,7 @@ export type PatientStackParams = {
   Contacts: { patientId: string };
   CreateMedication: undefined;
   Today: undefined;
+  EditProfile: undefined;
 };
 
 const Stack = createNativeStackNavigator<PatientStackParams>();
@@ -48,7 +49,7 @@ export default function AppNavigator() {
       <Stack.Screen name="RecordVitals" component={RecordVitalsScreen} options={{ title: 'Registrar Signos Vitales' }} />
       <Stack.Screen name="Medicamentos" component={DailyMedsScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Vitales" component={VitalsHistoryScreen} options={{ title: 'Signos Vitales' }} />
-      <Stack.Screen name="Perfil" component={ProfileScreen} options={{ title: 'Perfil' }} />
+      <Stack.Screen name="Perfil" component={ProfileScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ComingSoon" component={ComingSoonScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Contacts" component={ContactsScreen} options={{ headerShown: false }} />
       <Stack.Screen name="CreateMedication" component={CreateMedicationScreen} options={{ headerShown: false }} />
