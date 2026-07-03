@@ -100,10 +100,10 @@ describe('PatientDetailScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('Contacts', { patientId: 'p1' });
   });
 
-  it('navega a ComingSoon con los params correctos al presionar "Hoy"', async () => {
+  it('navega a Today al presionar "Hoy"', async () => {
     const { navigation } = renderScreen();
     fireEvent.press(await screen.findByText('Hoy'));
-    expect(navigation.navigate).toHaveBeenCalledWith('ComingSoon', { title: 'Hoy', subtitle: 'Pendientes de hoy' });
+    expect(navigation.navigate).toHaveBeenCalledWith('Today');
   });
 
   it('llama al contacto de emergencia al presionar "Emergencia"', async () => {

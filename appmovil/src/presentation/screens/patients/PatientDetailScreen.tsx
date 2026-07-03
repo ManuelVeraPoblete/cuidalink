@@ -159,7 +159,7 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
         <Text style={styles.sectionSubtitle}>Acciones para hoy</Text>
 
         <View style={styles.grid}>
-          <ActionCard icon="calendar" color="#2f6fed" title="Hoy" subtitle="Pendientes" onPress={() => goToComingSoon('Hoy', 'Pendientes de hoy')} />
+          <ActionCard icon="calendar" color="#2f6fed" title="Hoy" subtitle="Pendientes" onPress={() => navigation.navigate('Today')} />
           <ActionCard icon="medkit" color="#16a085" title="Medicamentos" subtitle="Dosis y horarios" onPress={goToMedicamentos} />
           <ActionCard icon="list" color="#7c5cfc" title="Tareas" subtitle="Cuidados diarios" onPress={() => goToComingSoon('Tareas', 'Cuidados diarios')} />
           <ActionCard icon="pulse" color="#e74c3c" title="Signos vitales" subtitle="Registrar control" onPress={goToVitales} />
