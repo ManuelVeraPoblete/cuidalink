@@ -1,10 +1,25 @@
 import apiClient from '@/data/http/apiClient';
-import { MedicationRepository } from '@/domain/repositories/MedicationRepository';
+import { MedicationRepository, CreateMedicationData } from '@/domain/repositories/MedicationRepository';
 import { Medication, MedicationLog } from '@/domain/entities';
 
 export class ApiMedicationRepository implements MedicationRepository {
   async listMedications(patientId: string): Promise<Medication[]> {
     const res = await apiClient.get<Medication[]>(`/patients/${patientId}/medications`);
+    return res.data;
+  }
+
+  async createMedication(patientId: string, data: CreateMedicationData): Promise<Medication> {
+    const res = await apiClient.post<Medication>(`/patients/${patientId}/medications`, {
+      name: data.name,
+      dosage: data.dosage,
+      instructions: data.instructions,
+      schedule: {
+        startTime: data.startTime,
+        frequencyHours: data.frequencyHours,
+        startDate: data.startDate,
+        endDate: data.endDate,
+      },
+    });
     return res.data;
   }
 
