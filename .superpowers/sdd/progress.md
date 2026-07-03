@@ -103,10 +103,15 @@ deberá correrlos localmente (con Docker) o confiar en CI antes de mergear a pro
 - [x] Task 1: MedicationSchedule.fromDailyInterval (dominio backend)
 - [x] Task 2: Exponer startTime/frequencyHours en la API
 - [x] Task 3: Mobile — corregir Medication.ts y agregar createMedication
-- [ ] Task 4: CreateMedicationScreen + navegación
+- [x] Task 4: CreateMedicationScreen + navegación
 
 Task 1: complete (commits 7b53d34..3f0917f, review clean — Minor: no test for frequencyHours=24 boundary case, cheap to add later but not plan-mandated)
 
 Task 2: complete (commits 3f0917f..8020f8c, review clean — nuevo test de integración NO ejecutado aquí, Docker no disponible, verificado a mano contra la lógica de fromDailyInterval de Task 1 y confirmado correcto; correr localmente/CI antes de mergear. Minor: startTime se persiste como String vía LocalTime.toString()/parse, consistente con el patrón existente de otros campos de schedule, riesgo bajo)
 
 Task 3: complete (commits 8020f8c..49b1948, review clean, no findings)
+
+Task 4: complete (commits 49b1948..3e298b9, review clean after fix — Important plan-mandated bug found: date pickers used toISOString() causing possible off-by-one-day in UTC+ timezones; fixed with local toLocalDateString() helper (commit 3e298b9), re-review confirmed resolved. Minor unresolved: DateTimePicker's value prop reparses stored 'YYYY-MM-DD' via new Date(...) which parses as UTC midnight, could misdisplay (not miscorrupt) the calendar on reopen in negative-offset timezones — display-only, non-blocking, flag for future cleanup alongside CreatePatientScreen's identical pattern)
+
+Revisión final de rama: APROBADA (Ready to merge: Yes). Ambos test suites limpios: mobile RNTL (nuevo patrón de mock para DateTimePicker establecido), backend compila + tests no-Testcontainers verdes. El test de integración nuevo (Docker no disponible aquí) fue trazado línea por línea por el revisor final y confirmado correcto.
+Sin hallazgos Critical/Important. Los 5 hallazgos Minor llevados de las revisiones por tarea quedan todos diferidos (no bloqueantes): sin test de borde frequencyHours=24, startTime persistido como String (consistente con patrón existente), onSubmit sin feedback si falta selectedPatientId (inalcanzable en la práctica), botón Cancelar no se deshabilita durante el guardado, y DateTimePicker relee la fecha guardada vía new Date() que puede desplegar mal el calendario en timezones negativos al reabrir (solo visual, no corrompe el dato ya que el path de escritura fue corregido en Task 4).
