@@ -5,6 +5,7 @@ import com.cuidalink.medication.domain.model.MedicationId;
 import com.cuidalink.patient.domain.model.*;
 import com.cuidalink.patient.domain.port.out.PatientRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,17 +21,20 @@ public class JpaPatientRepositoryAdapter implements PatientRepository {
     }
 
     @Override
+    @Transactional
     public Patient save(Patient p) {
         jpa.save(toJpa(p));
         return p;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Patient> findById(PatientId id) {
         return jpa.findById(id.value().toString()).map(this::toDomain);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Patient> findByOwnerOrCollaborator(UserId userId) {
         String uid = userId.value().toString();
         return jpa.findAllForUser(uid)
@@ -38,11 +42,13 @@ public class JpaPatientRepositoryAdapter implements PatientRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Patient> findByInvitationCode(String code) {
         return jpa.findByInvitationCodesCode(code).map(this::toDomain);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Patient> findByMedicationId(MedicationId medicationId) {
         return jpa.findByMedicationId(medicationId.value().toString()).map(this::toDomain);
     }
