@@ -131,3 +131,19 @@ Commit base: aaf3194
 Task 1: complete (commits aaf3194..4894e60, review clean, no Critical/Important findings). Minor: header block duplicated with DailyMedsScreen.tsx (task explicitly forbade touching that file, so unavoidable here; candidate for a future shared-header extraction), no test for missLog/'Omitir' path or no-selectedPatientId hint (brief's own test file didn't include these, not implementer's gap)
 
 Revisión final de rama: no se despachó por separado — plan de 1 sola tarea trabajado directo en main (sin rama/worktree), la revisión de Task 1 ya cubrió todo el diff. 68/68 tests, tsc limpio.
+
+---
+
+# CuidaLink — Trim HomeScreen — Ledger de Progreso
+
+Plan: docs/superpowers/plans/2026-07-03-home-screen-trim-plan.md
+Rama: main (sin worktree, decisión explícita del usuario)
+Inicio: 2026-07-03
+Commit base: 7b75914
+
+## Tasks
+- [x] Task 1: Quitar las 3 tarjetas del grid
+
+Task 1: complete (commits 7b75914..6651f1b, review clean, sin hallazgos)
+
+Revisión final de rama: no se despachó por separado — plan de 1 sola tarea trabajado directo en main (sin rama/worktree), la revisión de Task 1 ya cubrió todo el diff. 68/68 tests, tsc limpio.
