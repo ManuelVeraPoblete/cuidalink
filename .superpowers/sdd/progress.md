@@ -85,3 +85,28 @@ Task 6: complete (commits 7f90f41..3302fe7, review clean — 59/59 tests, tsc cl
 Revisión final de rama: APROBADA (Ready to merge: Yes). 59/59 tests mobile, tsc limpio, backend compila (main+test), MedicationServiceTest verde. El único test no ejecutable (MedicationIntegrationTest.getDailyLogs_includesMedicationDetails, requiere Docker) fue trazado línea por línea por el revisor y confirmado como correcto — debería pasar si se corre con Docker.
 Important #1 (join en la capa de controller en vez de un use case dedicado) y #2 (fetch redundante de Medication en confirm()) son decisiones deliberadas del plan/spec, confirmadas como intencionales, no bloqueantes.
 Minor (no bloqueantes, para futuro): sin null-guard defensivo en toResponse (seguro hoy, latente si se agrega hard-delete), logs legacy sin patientId fallarían al confirmar (no aplica, app greenfield), botones del modal no se deshabilitan durante la mutación (doble-tap podría disparar 2 PATCH, el segundo simplemente 400), Javadoc de constructoras de conveniencia bordeline vs regla de no-comentarios (ya en ledger de Task 1).
+
+---
+
+# CuidaLink — Pantalla "Nuevo medicamento" (CreateMedicationScreen) — Ledger de Progreso
+
+Plan: docs/superpowers/plans/2026-07-02-create-medication-screen-plan.md
+Rama: worktree-create-medication-screen (worktree: .claude/worktrees/create-medication-screen)
+Inicio: 2026-07-02
+Commit base: 7b53d34
+
+Nota de entorno: Docker no está disponible en este entorno — los tests *IntegrationTest
+(@Testcontainers) se verifican por compilación (mvn test-compile), no por ejecución real. El usuario
+deberá correrlos localmente (con Docker) o confiar en CI antes de mergear a producción.
+
+## Tasks
+- [x] Task 1: MedicationSchedule.fromDailyInterval (dominio backend)
+- [x] Task 2: Exponer startTime/frequencyHours en la API
+- [x] Task 3: Mobile — corregir Medication.ts y agregar createMedication
+- [ ] Task 4: CreateMedicationScreen + navegación
+
+Task 1: complete (commits 7b53d34..3f0917f, review clean — Minor: no test for frequencyHours=24 boundary case, cheap to add later but not plan-mandated)
+
+Task 2: complete (commits 3f0917f..8020f8c, review clean — nuevo test de integración NO ejecutado aquí, Docker no disponible, verificado a mano contra la lógica de fromDailyInterval de Task 1 y confirmado correcto; correr localmente/CI antes de mergear. Minor: startTime se persiste como String vía LocalTime.toString()/parse, consistente con el patrón existente de otros campos de schedule, riesgo bajo)
+
+Task 3: complete (commits 8020f8c..49b1948, review clean, no findings)

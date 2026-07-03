@@ -15,6 +15,13 @@ import { useInjection } from '@/presentation/hooks/useInjection';
 import { useAuthStore } from '@/presentation/stores/authStore';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
 
+function toLocalDateString(date: Date): string {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 const schema = z.object({
   name: z.string({ error: 'Nombre requerido' }).min(1, 'Nombre requerido'),
   dosage: z.string({ error: 'Dosis requerida' }).min(1, 'Dosis requerida'),
@@ -200,7 +207,7 @@ export default function CreateMedicationScreen({ navigation }: Props) {
               onChange={(_, selected) => {
                 setShowStartDatePicker(Platform.OS === 'ios');
                 if (selected) {
-                  setValue('startDate', selected.toISOString().split('T')[0], { shouldValidate: true });
+                  setValue('startDate', toLocalDateString(selected), { shouldValidate: true });
                 }
               }}
             />
@@ -214,7 +221,7 @@ export default function CreateMedicationScreen({ navigation }: Props) {
               onChange={(_, selected) => {
                 setShowEndDatePicker(Platform.OS === 'ios');
                 if (selected) {
-                  setValue('endDate', selected.toISOString().split('T')[0], { shouldValidate: true });
+                  setValue('endDate', toLocalDateString(selected), { shouldValidate: true });
                 }
               }}
             />
