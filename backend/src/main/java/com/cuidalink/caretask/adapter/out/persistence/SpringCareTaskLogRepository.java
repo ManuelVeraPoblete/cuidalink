@@ -19,5 +19,9 @@ public interface SpringCareTaskLogRepository extends JpaRepository<CareTaskLogJp
 
     boolean existsByCareTaskIdAndScheduledAt(String careTaskId, LocalDateTime scheduledAt);
 
-    List<CareTaskLogJpaEntity> findByStatusAndScheduledAt(String status, LocalDateTime scheduledAt);
+    @Query("SELECT l FROM CareTaskLogJpaEntity l WHERE l.status = 'PENDING' AND l.reminderSentAt IS NULL AND l.scheduledAt >= :windowStart AND l.scheduledAt <= :windowEnd")
+    List<CareTaskLogJpaEntity> findDueForReminder(
+        @Param("windowStart") LocalDateTime windowStart,
+        @Param("windowEnd") LocalDateTime windowEnd
+    );
 }

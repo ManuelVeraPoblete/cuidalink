@@ -14,10 +14,11 @@ public class CareTaskLog {
     private CareTaskLogStatus status;
     private UserId completedBy;
     private LocalDateTime completedAt;
+    private LocalDateTime reminderSentAt;
 
     public CareTaskLog(CareTaskLogId id, CareTaskId careTaskId, PatientId patientId,
                        LocalDateTime scheduledAt, CareTaskLogStatus status,
-                       UserId completedBy, LocalDateTime completedAt) {
+                       UserId completedBy, LocalDateTime completedAt, LocalDateTime reminderSentAt) {
         this.id = id;
         this.careTaskId = careTaskId;
         this.patientId = patientId;
@@ -25,6 +26,14 @@ public class CareTaskLog {
         this.status = status;
         this.completedBy = completedBy;
         this.completedAt = completedAt;
+        this.reminderSentAt = reminderSentAt;
+    }
+
+    /** Convenience constructor for callers that don't track reminder state — defaults to not-yet-reminded. */
+    public CareTaskLog(CareTaskLogId id, CareTaskId careTaskId, PatientId patientId,
+                       LocalDateTime scheduledAt, CareTaskLogStatus status,
+                       UserId completedBy, LocalDateTime completedAt) {
+        this(id, careTaskId, patientId, scheduledAt, status, completedBy, completedAt, null);
     }
 
     public void complete(UserId completedBy) {
@@ -35,6 +44,8 @@ public class CareTaskLog {
         this.completedAt = LocalDateTime.now();
     }
 
+    public void markReminderSent() { this.reminderSentAt = LocalDateTime.now(); }
+
     public CareTaskLogId getId() { return id; }
     public CareTaskId getCareTaskId() { return careTaskId; }
     public PatientId getPatientId() { return patientId; }
@@ -42,4 +53,5 @@ public class CareTaskLog {
     public CareTaskLogStatus getStatus() { return status; }
     public UserId getCompletedBy() { return completedBy; }
     public LocalDateTime getCompletedAt() { return completedAt; }
+    public LocalDateTime getReminderSentAt() { return reminderSentAt; }
 }

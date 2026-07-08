@@ -1,4 +1,3 @@
-// backend/src/test/java/com/cuidalink/notification/scheduler/CareTaskReminderSchedulerTest.java
 package com.cuidalink.notification.scheduler;
 
 import com.cuidalink.auth.domain.model.*;
@@ -51,10 +50,11 @@ class CareTaskReminderSchedulerTest {
         var log = new CareTaskLog(CareTaskLogId.generate(), task.getId(), patient.getId(),
             LocalDateTime.now().withSecond(0).withNano(0), CareTaskLogStatus.PENDING, null, null);
 
-        when(logRepository.findPendingAt(any())).thenReturn(List.of(log));
+        when(logRepository.findDueForReminder(any(), any())).thenReturn(List.of(log));
         when(taskRepository.findById(task.getId())).thenReturn(Optional.of(task));
         when(patientRepository.findById(patient.getId())).thenReturn(Optional.of(patient));
         when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
+        when(logRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         sut.sendReminders();
 
@@ -73,12 +73,36 @@ class CareTaskReminderSchedulerTest {
         var log = new CareTaskLog(CareTaskLogId.generate(), task.getId(), patient.getId(),
             LocalDateTime.now().withSecond(0).withNano(0), CareTaskLogStatus.PENDING, null, null);
 
-        when(logRepository.findPendingAt(any())).thenReturn(List.of(log));
+        when(logRepository.findDueForReminder(any(), any())).thenReturn(List.of(log));
         when(taskRepository.findById(task.getId())).thenReturn(Optional.of(task));
 
         sut.sendReminders();
 
         verify(notificationSender, never()).send(any(), any(), any());
+        verify(logRepository, never()).save(any());
+    }
+
+    @Test
+    void sendReminders_marksLogAsReminderSentToPreventDuplicateNotification() {
+        var owner = mockUser("owner-fcm-token");
+        var patient = mockPatient(owner.getId());
+        var schedule = new CareTaskSchedule(
+            LocalTime.of(9, 0), CareTaskScheduleType.DAYS_OF_WEEK,
+            List.of(DayOfWeek.MONDAY), LocalDate.now(), null);
+        var task = new CareTask(CareTaskId.generate(), patient.getId(),
+            "Tomar presión", "", schedule, CareTaskPriority.MEDIUM, true, true);
+        var log = new CareTaskLog(CareTaskLogId.generate(), task.getId(), patient.getId(),
+            LocalDateTime.now().withSecond(0).withNano(0), CareTaskLogStatus.PENDING, null, null);
+
+        when(logRepository.findDueForReminder(any(), any())).thenReturn(List.of(log));
+        when(taskRepository.findById(task.getId())).thenReturn(Optional.of(task));
+        when(patientRepository.findById(patient.getId())).thenReturn(Optional.of(patient));
+        when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
+        when(logRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        sut.sendReminders();
+
+        verify(logRepository).save(argThat(l -> l.getReminderSentAt() != null));
     }
 
     private User mockUser(String fcmTokenValue) {

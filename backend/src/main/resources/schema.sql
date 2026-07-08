@@ -143,6 +143,7 @@ CREATE TABLE care_task_logs (
     status              VARCHAR(20)  NOT NULL DEFAULT 'PENDING', -- enum: PENDING, DONE
     completed_by_id     VARCHAR(36),                            -- nullable: quién completó
     completed_at        TIMESTAMP,                              -- nullable: cuándo se completó
+    reminder_sent_at    TIMESTAMP,                              -- nullable: cuándo se envió el recordatorio (evita reenvíos duplicados)
 
     CONSTRAINT fk_task_logs_task    FOREIGN KEY (care_task_id) REFERENCES care_tasks (id),
     CONSTRAINT fk_task_logs_patient FOREIGN KEY (patient_id)   REFERENCES patients (id),

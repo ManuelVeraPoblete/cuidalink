@@ -17,6 +17,7 @@ public class CareTaskLogJpaEntity {
     private String status;
     private String completedById;
     private LocalDateTime completedAt;
+    private LocalDateTime reminderSentAt;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -38,4 +39,7 @@ public class CareTaskLogJpaEntity {
 
     public LocalDateTime getCompletedAt() { return completedAt; }
     public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
+
+    public LocalDateTime getReminderSentAt() { return reminderSentAt; }
+    public void setReminderSentAt(LocalDateTime reminderSentAt) { this.reminderSentAt = reminderSentAt; }
 }

@@ -15,5 +15,5 @@ public interface CareTaskLogRepository {
     Optional<CareTaskLog> findById(CareTaskLogId id);
     List<CareTaskLog> findByPatientIdAndDate(PatientId patientId, LocalDate date);
     boolean existsByCareTaskIdAndScheduledAt(CareTaskId careTaskId, LocalDateTime scheduledAt);
-    List<CareTaskLog> findPendingAt(LocalDateTime scheduledAt);
+    List<CareTaskLog> findDueForReminder(LocalDateTime windowStart, LocalDateTime windowEnd);
 }

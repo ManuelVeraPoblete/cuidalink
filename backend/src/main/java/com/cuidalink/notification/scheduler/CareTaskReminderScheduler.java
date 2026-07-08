@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Component
 public class CareTaskReminderScheduler {
 
+    private static final int CATCH_UP_WINDOW_MINUTES = 2;
+
     private final CareTaskLogRepository logRepository;
     private final CareTaskRepository taskRepository;
     private final PatientRepository patientRepository;
@@ -31,10 +33,11 @@ public class CareTaskReminderScheduler {
         this.notificationSender = notificationSender;
     }
 
-    @Scheduled(fixedDelay = 60_000)  // every minute
+    @Scheduled(fixedDelay = 60_000)  // cada minuto
     public void sendReminders() {
         var now = LocalDateTime.now().withSecond(0).withNano(0);
-        var dueLogs = logRepository.findPendingAt(now);
+        var windowStart = now.minusMinutes(CATCH_UP_WINDOW_MINUTES);
+        var dueLogs = logRepository.findDueForReminder(windowStart, now);
         for (var log : dueLogs) {
             taskRepository.findById(log.getCareTaskId()).ifPresent(task -> {
                 if (!task.isReminderActive()) return;
@@ -43,10 +46,12 @@ public class CareTaskReminderScheduler {
                         if (owner.getFcmToken() != null) {
                             notificationSender.send(owner.getFcmToken().value(),
                                 "Tarea pendiente",
-                                task.getName() + " — " + now.toLocalTime().toString());
+                                task.getName() + " — " + log.getScheduledAt().toLocalTime().toString());
                         }
                     });
                 });
+                log.markReminderSent();
+                logRepository.save(log);
             });
         }
     }

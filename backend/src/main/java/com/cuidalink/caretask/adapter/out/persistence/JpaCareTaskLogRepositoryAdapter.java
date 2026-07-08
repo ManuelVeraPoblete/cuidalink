@@ -50,9 +50,8 @@ public class JpaCareTaskLogRepositoryAdapter implements CareTaskLogRepository {
     }
 
     @Override
-    public List<CareTaskLog> findPendingAt(LocalDateTime scheduledAt) {
-        return jpa.findByStatusAndScheduledAt(CareTaskLogStatus.PENDING.name(), scheduledAt)
-            .stream().map(this::toDomain).toList();
+    public List<CareTaskLog> findDueForReminder(LocalDateTime windowStart, LocalDateTime windowEnd) {
+        return jpa.findDueForReminder(windowStart, windowEnd).stream().map(this::toDomain).toList();
     }
 
     private CareTaskLogJpaEntity toJpa(CareTaskLog l) {
@@ -64,6 +63,7 @@ public class JpaCareTaskLogRepositoryAdapter implements CareTaskLogRepository {
         e.setStatus(l.getStatus().name());
         e.setCompletedById(l.getCompletedBy() != null ? l.getCompletedBy().value().toString() : null);
         e.setCompletedAt(l.getCompletedAt());
+        e.setReminderSentAt(l.getReminderSentAt());
         return e;
     }
 
@@ -77,7 +77,8 @@ public class JpaCareTaskLogRepositoryAdapter implements CareTaskLogRepository {
             e.getScheduledAt(),
             CareTaskLogStatus.valueOf(e.getStatus()),
             completedBy,
-            e.getCompletedAt()
+            e.getCompletedAt(),
+            e.getReminderSentAt()
         );
     }
 }
