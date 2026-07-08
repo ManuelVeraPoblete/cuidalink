@@ -1,8 +1,9 @@
+import { VitalMeasurement } from './VitalMeasurement';
+
 export interface VitalRecord {
   id: string;
-  definitionId: string;
-  definitionName: string;
-  unit: string;
-  value: number;
+  patientId: string;
+  recordedById: string;
   recordedAt: string;
+  measurements: VitalMeasurement[];
 }

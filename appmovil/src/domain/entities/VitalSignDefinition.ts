@@ -3,6 +3,6 @@ export interface VitalSignDefinition {
   patientId: string;
   name: string;
   unit: string;
-  minValue?: number;
-  maxValue?: number;
+  normalRangeMin?: number;
+  normalRangeMax?: number;
 }

@@ -4,6 +4,7 @@ export * from './Collaborator';
 export * from './Medication';
 export * from './MedicationLog';
 export * from './VitalSignDefinition';
+export * from './VitalMeasurement';
 export * from './VitalRecord';
 export * from './CareTask';
 export * from './CareTaskLog';
