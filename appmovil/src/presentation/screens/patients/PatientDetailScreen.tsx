@@ -114,7 +114,17 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
               <Text style={styles.headerLink}>Link</Text>
             </Text>
           </View>
-          <View style={styles.backButtonSpacer} />
+          {patient.isOwner ? (
+            <TouchableOpacity
+              testID="edit-patient-button"
+              style={styles.backButton}
+              onPress={() => navigation.navigate('EditPatient', { patientId })}
+            >
+              <Ionicons name="create-outline" size={20} color="#fff" />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.backButtonSpacer} />
+          )}
         </View>
 
         <Text style={styles.title}>Detalle del paciente</Text>

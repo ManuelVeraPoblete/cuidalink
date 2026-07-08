@@ -129,4 +129,16 @@ describe('PatientDetailScreen', () => {
       'Este paciente no tiene un teléfono de emergencia registrado.'
     );
   });
+
+  it('navega a EditPatient al presionar el ícono de editar cuando es owner', async () => {
+    const { navigation } = renderScreen();
+    fireEvent.press(await screen.findByTestId('edit-patient-button'));
+    expect(navigation.navigate).toHaveBeenCalledWith('EditPatient', { patientId: 'p1' });
+  });
+
+  it('oculta el ícono de editar cuando no es owner', async () => {
+    renderScreen({ patient: { ...basePatient, isOwner: false } });
+    await screen.findByText('Medicamentos');
+    expect(screen.queryByTestId('edit-patient-button')).toBeNull();
+  });
 });
