@@ -151,6 +151,21 @@ CREATE TABLE care_task_logs (
     CONSTRAINT uq_task_logs_task_scheduled UNIQUE (care_task_id, scheduled_at)
 );
 
+-- Contactos de referencia del paciente (familia/médico/emergencia, configurados por el owner)
+CREATE TABLE patient_contacts (
+    id            VARCHAR(36)  PRIMARY KEY,
+    patient_id    VARCHAR(36)  NOT NULL,
+    name          VARCHAR(255) NOT NULL,
+    category      VARCHAR(20)  NOT NULL,
+    relationship  VARCHAR(255),
+    phone         VARCHAR(50)  NOT NULL,
+    email         VARCHAR(255),
+    note          TEXT,
+    priority      BOOLEAN      NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_patient_contacts_patient FOREIGN KEY (patient_id) REFERENCES patients (id)
+);
+
 -- ─────────────────────────────────────────────────────────
 -- ÍNDICES
 -- ─────────────────────────────────────────────────────────
@@ -198,3 +213,6 @@ CREATE INDEX idx_care_tasks_active  ON care_tasks (active);
 CREATE INDEX idx_task_log_patient_scheduled ON care_task_logs (patient_id, scheduled_at);
 CREATE INDEX idx_task_log_status_scheduled  ON care_task_logs (status, scheduled_at);
 CREATE INDEX idx_task_log_task              ON care_task_logs (care_task_id);
+
+-- patient_contacts: findByPatientId
+CREATE INDEX idx_patient_contacts_patient ON patient_contacts (patient_id);
