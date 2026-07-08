@@ -16,6 +16,7 @@ import { useInjection } from '@/presentation/hooks/useInjection';
 import { isValidRut } from '@/domain/utils/rut';
 import { isValidChileSubscriberNumber, stripChilePrefix, toChilePhone } from '@/domain/utils/chilePhone';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import CollaboratorsSection from '@/presentation/components/CollaboratorsSection';
 
 const GENDER_OPTIONS = [
   { label: 'Masculino', value: 'MALE' },
@@ -218,6 +219,8 @@ export default function EditPatientScreen({ navigation, route }: Props) {
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Guardar Cambios</Text>}
       </TouchableOpacity>
       </View>
+
+      <CollaboratorsSection patientId={patientId} isOwner={patient.isOwner} />
 
       <Modal visible={showBloodModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
