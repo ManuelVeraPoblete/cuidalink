@@ -83,6 +83,11 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
     navigation.navigate('Vitales');
   }
 
+  function goToTasks() {
+    setSelectedPatientId(patientId);
+    navigation.navigate('Tasks');
+  }
+
   function goToContacts() {
     navigation.navigate('Contacts', { patientId });
   }
@@ -161,7 +166,7 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
         <View style={styles.grid}>
           <ActionCard icon="calendar" color="#2f6fed" title="Hoy" subtitle="Pendientes" onPress={() => navigation.navigate('Today')} />
           <ActionCard icon="medkit" color="#16a085" title="Medicamentos" subtitle="Dosis y horarios" onPress={goToMedicamentos} />
-          <ActionCard icon="list" color="#7c5cfc" title="Tareas" subtitle="Cuidados diarios" onPress={() => goToComingSoon('Tareas', 'Cuidados diarios')} />
+          <ActionCard icon="list" color="#7c5cfc" title="Tareas" subtitle="Cuidados diarios" onPress={goToTasks} />
           <ActionCard icon="pulse" color="#e74c3c" title="Signos vitales" subtitle="Registrar control" onPress={goToVitales} />
           <ActionCard icon="clipboard" color="#f5a623" title="Observaciones" subtitle="Notas del cuidador" onPress={() => goToComingSoon('Observaciones', 'Notas del cuidador')} />
           <ActionCard icon="call-outline" color="#2f6fed" title="Contactos" subtitle="Familia y médico" onPress={goToContacts} />

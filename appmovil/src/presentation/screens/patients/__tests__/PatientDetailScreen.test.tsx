@@ -87,6 +87,13 @@ describe('PatientDetailScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('Medicamentos');
   });
 
+  it('selecciona el paciente y navega a Tasks al presionar "Tareas"', async () => {
+    const { navigation } = renderScreen();
+    fireEvent.press(await screen.findByText('Tareas'));
+    expect(useAuthStore.getState().selectedPatientId).toBe('p1');
+    expect(navigation.navigate).toHaveBeenCalledWith('Tasks');
+  });
+
   it('selecciona el paciente y navega a Vitales al presionar "Signos vitales"', async () => {
     const { navigation } = renderScreen();
     fireEvent.press(await screen.findByText('Signos vitales'));
