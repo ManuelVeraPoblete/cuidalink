@@ -13,6 +13,7 @@ import ProfileScreen from '@/presentation/screens/profile/ProfileScreen';
 import EditProfileScreen from '@/presentation/screens/profile/EditProfileScreen';
 import ComingSoonScreen from '@/presentation/screens/common/ComingSoonScreen';
 import ContactsScreen from '@/presentation/screens/patients/ContactsScreen';
+import ContactFormScreen from '@/presentation/screens/patients/ContactFormScreen';
 import TasksScreen from '@/presentation/screens/tasks/TasksScreen';
 import CreateTaskScreen from '@/presentation/screens/tasks/CreateTaskScreen';
 
@@ -28,6 +29,7 @@ export type PatientStackParams = {
   Perfil: undefined;
   ComingSoon: { title: string; subtitle: string };
   Contacts: { patientId: string };
+  ContactForm: { patientId: string; contactId?: string };
   CreateMedication: undefined;
   Tasks: undefined;
   CreateTask: undefined;
@@ -58,6 +60,7 @@ export default function AppNavigator() {
       <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Editar Perfil' }} />
       <Stack.Screen name="ComingSoon" component={ComingSoonScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Contacts" component={ContactsScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ContactForm" component={ContactFormScreen} options={{ headerShown: false }} />
       <Stack.Screen name="CreateMedication" component={CreateMedicationScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Tasks" component={TasksScreen} options={{ headerShown: false }} />
       <Stack.Screen name="CreateTask" component={CreateTaskScreen} options={{ headerShown: false }} />
