@@ -114,6 +114,42 @@ CREATE TABLE vital_records (
     CONSTRAINT fk_vital_rec_patient FOREIGN KEY (patient_id) REFERENCES patients (id)
 );
 
+-- Tareas de cuidado diario programadas por el owner
+CREATE TABLE care_tasks (
+    id                      VARCHAR(36)  PRIMARY KEY,
+    patient_id              VARCHAR(36)  NOT NULL,
+    name                    VARCHAR(255) NOT NULL,
+    instructions            TEXT,
+    priority                VARCHAR(20)  NOT NULL DEFAULT 'MEDIUM',  -- enum: LOW, MEDIUM, HIGH
+    reminder_active         BOOLEAN      NOT NULL DEFAULT TRUE,
+    active                  BOOLEAN      NOT NULL DEFAULT TRUE,
+
+    -- Schedule (embebido, mismo patrón que medications)
+    schedule_time            VARCHAR(5)   NOT NULL,              -- "HH:mm"
+    schedule_type            VARCHAR(20)  NOT NULL,              -- enum: DAYS_OF_WEEK, DATE_RANGE
+    schedule_days_of_week    VARCHAR(255),                       -- "MONDAY,FRIDAY" (solo DAYS_OF_WEEK)
+    schedule_start_date      DATE         NOT NULL,
+    schedule_end_date        DATE,                               -- nullable = sin fecha fin (solo DATE_RANGE)
+
+    CONSTRAINT fk_care_tasks_patient FOREIGN KEY (patient_id) REFERENCES patients (id)
+);
+
+-- Logs diarios de tareas (generados por cron a las 00:01)
+CREATE TABLE care_task_logs (
+    id                  VARCHAR(36)  PRIMARY KEY,
+    care_task_id        VARCHAR(36)  NOT NULL,
+    patient_id          VARCHAR(36)  NOT NULL,                  -- desnormalizado para queries eficientes
+    scheduled_at        TIMESTAMP    NOT NULL,
+    status              VARCHAR(20)  NOT NULL DEFAULT 'PENDING', -- enum: PENDING, DONE
+    completed_by_id     VARCHAR(36),                            -- nullable: quién completó
+    completed_at        TIMESTAMP,                              -- nullable: cuándo se completó
+
+    CONSTRAINT fk_task_logs_task    FOREIGN KEY (care_task_id) REFERENCES care_tasks (id),
+    CONSTRAINT fk_task_logs_patient FOREIGN KEY (patient_id)   REFERENCES patients (id),
+    -- Idempotencia del scheduler: un solo log por tarea+hora
+    CONSTRAINT uq_task_logs_task_scheduled UNIQUE (care_task_id, scheduled_at)
+);
+
 -- ─────────────────────────────────────────────────────────
 -- ÍNDICES
 -- ─────────────────────────────────────────────────────────
@@ -150,3 +186,14 @@ CREATE INDEX idx_vital_def_patient ON vital_definitions (patient_id);
 
 -- vital_records: findByPatientIdAndRecordedAtBetween (reportes)
 CREATE INDEX idx_vital_rec_patient_recorded ON vital_records (patient_id, recorded_at);
+
+-- care_tasks: findByPatientId + findByActiveTrue (DailyCareTaskLogScheduler)
+CREATE INDEX idx_care_tasks_patient ON care_tasks (patient_id);
+CREATE INDEX idx_care_tasks_active  ON care_tasks (active);
+
+-- care_task_logs:
+--   findByPatientIdAndDate (logs del día)
+--   findPendingAt          (CareTaskReminderScheduler cada minuto)
+CREATE INDEX idx_task_log_patient_scheduled ON care_task_logs (patient_id, scheduled_at);
+CREATE INDEX idx_task_log_status_scheduled  ON care_task_logs (status, scheduled_at);
+CREATE INDEX idx_task_log_task              ON care_task_logs (care_task_id);
