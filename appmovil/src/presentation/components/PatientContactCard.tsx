@@ -5,10 +5,11 @@ import { pickContactCategoryStyle } from '@/domain/utils/contactDisplay';
 
 type Props = {
   contact: PatientContact;
+  isOwner: boolean;
   onEdit: () => void;
 };
 
-export default function PatientContactCard({ contact, onEdit }: Props) {
+export default function PatientContactCard({ contact, isOwner, onEdit }: Props) {
   const style = pickContactCategoryStyle(contact.category);
 
   function handleCall() {
@@ -63,10 +64,12 @@ export default function PatientContactCard({ contact, onEdit }: Props) {
           <Ionicons name="call" size={18} color="#5ee7df" />
           <Text style={styles.actionText}>Llamar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={onEdit}>
-          <Ionicons name="create-outline" size={18} color="#5ee7df" />
-          <Text style={styles.actionText}>Editar</Text>
-        </TouchableOpacity>
+        {isOwner && (
+          <TouchableOpacity style={styles.actionButton} onPress={onEdit}>
+            <Ionicons name="create-outline" size={18} color="#5ee7df" />
+            <Text style={styles.actionText}>Editar</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

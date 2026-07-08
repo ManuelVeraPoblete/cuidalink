@@ -55,6 +55,7 @@ export default function ContactsScreen({ navigation, route }: Props) {
         renderItem={({ item }) => (
           <PatientContactCard
             contact={item}
+            isOwner={!!patient?.isOwner}
             onEdit={() => navigation.navigate('ContactForm', { patientId, contactId: item.id })}
           />
         )}

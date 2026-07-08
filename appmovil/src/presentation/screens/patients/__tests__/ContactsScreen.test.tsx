@@ -104,6 +104,13 @@ describe('ContactsScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('ContactForm', { patientId: 'p1', contactId: 'c1' });
   });
 
+  it('oculta el botón "Editar" de cada contacto cuando el usuario no es owner', async () => {
+    renderScreen([buildContact()], { ...ownerPatient, isOwner: false });
+    await screen.findByText('Ana Martínez');
+    expect(screen.queryByText('Editar')).toBeNull();
+    expect(screen.getByText('Llamar')).toBeTruthy();
+  });
+
   it('muestra el botón "Agregar contacto" cuando el usuario es owner', async () => {
     renderScreen([]);
     expect(await screen.findByText('Agregar contacto')).toBeTruthy();
