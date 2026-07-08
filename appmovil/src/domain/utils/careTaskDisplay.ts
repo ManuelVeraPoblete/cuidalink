@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import type { Ionicons } from '@expo/vector-icons';
 
 export function pickTaskIcon(name: string): { icon: keyof typeof Ionicons.glyphMap; color: string } {
   const n = name.toLowerCase();
