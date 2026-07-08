@@ -67,7 +67,7 @@ describe('ContactsScreen', () => {
   it('muestra los contactos con su categoría y relación', async () => {
     renderScreen([buildContact()]);
     expect(await screen.findByText('Ana Martínez')).toBeTruthy();
-    expect(screen.getByText('Familia')).toBeTruthy();
+    expect(screen.getAllByText('Familia').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Hija')).toBeTruthy();
     expect(screen.getByText('ana@email.com')).toBeTruthy();
   });
@@ -84,7 +84,7 @@ describe('ContactsScreen', () => {
       buildContact({ id: 'c2', name: 'Dr. Pablo Rojas', category: 'DOCTOR', email: 'pablo@clinica.cl' }),
     ]);
     await screen.findByText('Ana Martínez');
-    fireEvent.press(screen.getByText('Médico'));
+    fireEvent.press(screen.getByTestId('contacts-tab-DOCTOR'));
     expect(screen.getByText('Dr. Pablo Rojas')).toBeTruthy();
     expect(screen.queryByText('Ana Martínez')).toBeNull();
   });

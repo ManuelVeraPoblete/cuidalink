@@ -33,7 +33,7 @@ export default function PatientContactCard({ contact, onEdit }: Props) {
           <View style={styles.categoryRow}>
             <View style={[styles.categoryBadge, { backgroundColor: style.color }]}>
               <Ionicons name={style.icon} size={12} color="#fff" />
-              <Text style={styles.categoryText}>{style.label.toUpperCase()}</Text>
+              <Text style={styles.categoryText}>{style.label}</Text>
             </View>
             {!!contact.relationship && <Text style={styles.relationship}>{contact.relationship}</Text>}
           </View>

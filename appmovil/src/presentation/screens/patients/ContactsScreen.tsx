@@ -87,6 +87,7 @@ export default function ContactsScreen({ navigation, route }: Props) {
               {TABS.map((t) => (
                 <TouchableOpacity
                   key={t.key}
+                  testID={`contacts-tab-${t.key}`}
                   style={[styles.tab, tab === t.key && styles.tabActive]}
                   onPress={() => setTab(t.key)}
                 >
