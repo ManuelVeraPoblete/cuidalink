@@ -55,7 +55,7 @@ describe('PatientDetailScreen', () => {
 
   it('renderiza las 7 tarjetas de acción', async () => {
     renderScreen();
-    for (const title of ['Hoy', 'Medicamentos', 'Tareas', 'Signos vitales', 'Observaciones', 'Contactos', 'Historial']) {
+    for (const title of ['Hoy', 'Medicamentos', 'Tareas', 'Signos vitales', 'Bitácora', 'Contactos', 'Historial']) {
       expect(await screen.findByText(title)).toBeTruthy();
     }
   });

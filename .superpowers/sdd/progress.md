@@ -176,3 +176,85 @@ Task 5: complete (commits 8f14fc2..9226f29, review clean — desviación del bri
 
 Revisión final de rama: APROBADA (Ready to merge: Yes). Contratos cruzados verificados extremo a extremo: forma de AuthResponse ↔ User mobile coincide campo a campo, teléfono round-tripea consistente (+56 canónico, EditProfileScreen strip/prefix correcto), ruta EditProfile funciona (tipo de Task 4 + registro de Task 5 juntos), 409 de correo duplicado funciona en las 3 capas. Backend: `mvn test -Dtest='!*IntegrationTest' -q` verde. Mobile: 78/78 tests, tsc limpio. Sin hallazgos Critical/Important.
 Minor (no bloqueantes, para el usuario): (1) al sacar el generador de informe PDF de ProfileScreen, la función queda huérfana en TODA la app — DateRangePicker.tsx sin referentes, downloadReportUseCase/reportRepo siguen instanciados en useInjection sin consumidor; backend/ApiReportRepository siguen existiendo pero inalcanzables desde la UI. Decisión pendiente del usuario: borrar el código muerto o dejarlo aparcado para una futura reubicación. (2) __mocks__/axios.ts (compartido) no tiene isAxiosError ni patch — causó la desviación de Task 5, gap latente para futuros tests de data/repositories. (3) warning de act() en ProfileScreen.test.tsx:36 (setState de Zustand fuera de act en afterEach) — cosmético, no afecta resultados.
+
+Task 7: complete (commits 981d05d..d8755ba, review clean — Minor: complete() does a second full listTasks()+hasAccess round-trip just to enrich the response (avoidable overhead, not a bug, out of scope per brief's declared interfaces); toResponse has no null-guard if a task were hard-deleted, currently unreachable since CareTask only supports deactivate() not delete, future-proofing note only. Both carry to final review.)
+
+Task 8: complete (commits d8755ba..026b8be, review clean — Minor: no per-task exception isolation in the loop, mirrors pre-existing DailyMedicationLogScheduler gap, not a regression, carry to final review)
+
+Task 9: complete (commits 026b8be..668dbaa, review clean — Minor: notification body uses scheduler's truncated `now` instead of log.getScheduledAt(), equivalent in practice given the query contract, cosmetic only; FCM-token-null-check pattern duplicated with EscalationScheduler, not worth extracting for 2 call sites)
+
+Task 10: complete (commits 668dbaa..f267b42, review clean — Minor: schedule_* columns indented 2 spaces further than siblings, cosmetic, no runtime effect)
+
+Task 11: complete (commits f267b42..798b1fb, review clean — CareTaskIntegrationTest.NOT executed here, Docker unavailable; independently verified by the reviewer against the real committed source (Controller/Service/DTOs/enums), same failure class as pre-existing *IntegrationTest baseline. BACKEND COMPLETE — Tasks 1-11 all done, mvn test -Dtest='!*IntegrationTest' -q green throughout.)
+
+Task 12: complete (commits 798b1fb..a3e582b, review clean, no findings)
+
+Task 14: complete (commits e9afa12..ebe0fa1, review clean — Minor: CreateTaskScreen (Task 18) must client-side validate startDate/endDate when scheduleType=DATE_RANGE since only DAYS_OF_WEEK gets a server-side default; noted for that task)
+
+Task 13: complete (commits a3e582b..e9afa12, review clean after fix 85459dc — Important: careTaskDisplay.ts imported Ionicons as a runtime value inside domain/utils/, breaking the zero-framework-dependency convention set by sibling patientDisplay.ts; fixed with `import type`, zero runtime change, re-review confirmed resolved. Minor unresolved: regexes lack word-boundary anchoring, e.g. "comida" could match inside a longer word -- low risk given controlled task-name vocabulary, carry to final review.)
+
+Task 15: complete (commits 85459dc..c3535ac, review clean — report reconstructed by controller after implementer subagent hit a session API limit post-commit, pre-report; independently re-verified 3/3 tests passing by controller and confirmed again by reviewer, act() warning confirmed pre-existing/identical to MedicationCard.test.tsx baseline. Minor: onPress passed unconditionally relying on disabled prop, and dead-code-shaped '||' fallback on non-optional instructions field -- both intentional parity with MedicationCard, not new risks.)
+
+Task 16: complete (commits c3535ac..c6d4384, review clean — Minor: modal doesn't surface log.instructions or priority, matches the brief's own reference code exactly so not a deviation, easy future enhancement note only)
+
+Task 17: complete (commits c6d4384..50a85e4, review clean — 5/5 tests, Jest hang after results confirmed pre-existing/identical to DailyMedsScreen.test.tsx baseline, not introduced here. tsc --noEmit intentionally not run as a gate (missing 'Tasks'/'CreateTask' routes, deferred to Task 19). Minor: onPress PENDING-guard duplicated between TasksScreen and TaskCard's own internal clickable check, and today-date recomputed independently in 2 places -- both inherited unchanged from DailyMedsScreen pattern, not new.)
+
+Task 18: complete (commits 50a85e4..ac535a9, review clean — reviewer confirmed byte-exact transcription via scripted diff. Implementer reported DONE_WITH_CONCERNS: test suite hangs after printing results unlike CreateMedicationScreen; controller independently re-ran with --forceExit and confirmed 7/7 passing, same class of pre-existing Jest-teardown quirk seen in other screen suites, not a regression. Minor (all inherited from the brief's own test design, not implementer gaps): no test exercises the 'Requiere atención' patient-card branch, no test exercises a full DATE_RANGE submission, priority/reminder-switch never interacted with in tests -- carry all to final review as test-coverage gaps.)
+
+Task 19: complete (commits ac535a9..29d0503, review clean — reviewer independently re-ran tsc --noEmit and confirmed clean, and verified TasksScreen/CreateTaskScreen route-name usage matches the new PatientStackParams entries. 19/19 test suites, 103/103 tests passing project-wide. Minor: route entry ordering in PatientStackParams vs Stack.Screen registrations is internally consistent but brief prose was ambiguous about exact placement, no functional impact. ALL 19 TASKS COMPLETE.)
+
+Revision final de rama: APROBADA (Ready to merge: Yes, con el hallazgo Important como fast-follow recomendado). Verificado end-to-end: contrato JSON backend<->mobile exacto para createTask/completeLog, enums Java<->TS coinciden literal por literal, sin fuga de estados de medicamento (ESCALATED/MISSED/CONFIRMED) en la UI de tareas, pureza hexagonal sin imports prohibidos, autorizacion sin bypass en ningun endpoint, convencion de query-key consistente, sin regresion al modulo medication existente.
+Important #1: CareTaskReminderScheduler usa match exacto al minuto (findPendingAt) sin ventana de recuperacion -- a diferencia de EscalationScheduler (que usa <= y se autocorrige), un tick perdido (deploy, GC pause, drift) descarta el recordatorio permanentemente. Es tanto una decision de diseno del plan como un gap de implementacion -- requiere decision del usuario (agregar ventana de recuperacion vs aceptar como best-effort documentado).
+Minor (no bloqueantes): updateTask/getTask sin cobertura de tests en todo el feature (heredado de MedicationServiceTest, ninguno de los dos esta wireado a la UI todavia); CareTaskLog.priority se transporta en toda la pila pero nunca se renderiza (dato inerte, coincide con el mockup); TasksScreen invalida ['care-task-logs'] sin scope de paciente mientras CreateTaskScreen sí lo scopea (ambos correctos, el primero mas amplio de lo necesario); mocks de test usan timestamps con offset mientras el backend real emite sin offset (sin bug, Date() maneja ambos, solo nota de cobertura).
+
+Fix del hallazgo Important (recordatorios perdidos): APLICADO Y APROBADO (commit 806c6e1). Ventana de recuperacion de 2 minutos (findDueForReminder con rango inclusive en ambos extremos) + marcador reminderSentAt en CareTaskLog para evitar reenvios duplicados. Constructor de 7 argumentos de CareTaskLog se mantiene compatible via delegacion (nuevo constructor de 8 args), ningun call site preexistente (DailyCareTaskLogScheduler, CareTaskServiceTest, CareTaskIntegrationTest) requirio cambios -- verificado por el revisor via ausencia en el diff + 60/60 tests no-integracion verdes. Mejora adicional no solicitada pero correcta: el mensaje de notificacion ahora usa log.getScheduledAt() en vez de la hora del scheduler. Minor no bloqueante: falta test del sub-caso 'reminderActive=true pero sin FCM token' (deberia igual marcar reminderSentAt), y los bounds exactos de la ventana no se verifican en tests unitarios (solo verificables via el test de integracion con Testcontainers, no ejecutable en este entorno).
+
+RAMA COMPLETA: 19 tareas + 1 fix post-revision-final, todas aprobadas. Ready to merge: Yes.
+
+---
+
+# CuidaLink — Pantalla "Contactos" (PatientContact) — Ledger de Progreso
+
+Plan: docs/superpowers/plans/2026-07-08-patient-contacts-plan.md
+Rama: main (sin worktree, decisión explícita del usuario, consistente con la mayoría de features anteriores)
+Inicio: 2026-07-08
+Commit base: afa60f7
+
+## Tasks
+- [x] Task 1: Dominio PatientContact
+- [x] Task 2: Puertos (in/out) de PatientContact
+- [x] Task 3: PatientContactService (con test TDD)
+- [x] Task 4: Persistencia JPA
+- [x] Task 5: REST — DTOs, controller y test de integración
+- [x] Task 6: Entidad, repositorio y DI (mobile)
+- [x] Task 7: Util contactDisplay.ts (TDD)
+- [x] Task 8: PatientContactCard.tsx
+- [x] Task 9: ContactsScreen.tsx (reemplazo completo, TDD)
+- [x] Task 10: ContactFormScreen.tsx (crear y editar, TDD)
+- [x] Task 11: Registrar la ruta ContactForm
+- [x] Task 12: Ícono de editar paciente en PatientDetailScreen
+- [x] Task 13: Mover CollaboratorsSection a EditPatientScreen
+- [x] Task 14: Suite completa y typecheck
+- [x] Task 15: Sembrar los 3 contactos de María González López
+
+Task 1: complete (commits afa60f7..54dfcca, review clean, no findings)
+Task 2: complete (commits 54dfcca..00b0a07, review clean, no findings)
+Task 3: complete (commits 00b0a07..9ade4ef, review clean — Minor: "contact belongs to patient" guard in update() has no dedicated test scenario (untested branch, not brief-mandated), wildcard import style nit inherited from brief. Both non-blocking, carry to final review.)
+Task 4: complete (commits 9ade4ef..5f81938, review clean — Minor: schema.sql category column missing inline enum comment (pre-existing gap in brief's own DDL, not implementer's), save() returns input unchanged (harmless, matches existing JpaVitalDefinitionRepositoryAdapter convention). Both non-blocking, carry to final review.)
+Task 5: complete (commits 5f81938..493a987, review clean — BACKEND COMPLETE (Tasks 1-5). PatientContactIntegrationTest NOT executed here, Docker unavailable; independently verified by the reviewer against real Task 2/3 use case signatures and confirmed the reported failure is a genuine Testcontainers/Docker-socket error, not a masked bug — same baseline as all other *IntegrationTest files in this repo. Minor: enum valueOf() leaks a Java-ism error message on invalid category string, matches brief exactly, not a defect.)
+Task 6: complete (commits 493a987..6950436, review clean, no findings — field/endpoint contract independently verified against actual backend PatientContactResponse/Controller, not just the brief)
+Task 7: complete (commits 6950436..82f8b14, review clean — Minor: switch has no default/exhaustiveness guard, safe today since union is closed and all 3 members handled, optional future-proofing only)
+Task 8: complete (commits 82f8b14..499dd44, review clean — Minor: no testID props (component relies on text queries for Task 9's indirect coverage), and a documentation inconsistency in the brief itself (Interfaces line mentions an onCall prop the actual code block doesn't have) — harmless since Task 9's plan code never references onCall, only onEdit.)
+Task 9: complete (commits 499dd44..f98b352, review clean after mid-task correction — first pass wrongly modified already-approved Task 8's PatientContactCard.tsx (uppercase badge) to dodge a tab/badge text-collision in the brief's own test; controller rejected and redirected to testID-based tab disambiguation instead, keeping PatientContactCard untouched; reviewer confirmed the file is entirely absent from the final diff, proving a true net revert. Minor: ListHeaderComponent inlines header/tab JSX rather than extracting a sub-component, acceptable at current size.)
+Task 10: complete (commits f98b352..f382c74, review clean after fix — brief's given code had a genuine race condition (title/form rendered before async listContacts resolved in edit mode, causing precharge assertions to flake); fixed with an isEditing-scoped loading guard mirroring EditPatientScreen's pattern, verified byte-diff to be the only change and correctly does not affect create mode. Minor: indefinite spinner if contactId doesn't match any fetched contact (pre-existing pattern, not new), listContacts fetches full list to find one item (brief's own design).)
+Task 11: complete (commits f382c74..6b52ed8, review clean, no findings — tsc now fully clean)
+Task 12: complete (commits 6b52ed8..7a4241b, review clean, no findings — plan text miscounted pre-existing tests as 11 (actually 12), harmless arithmetic slip; only the positive owner-shows-button test genuinely failed in RED, the negative test naturally passes both before/after by design, not a broken TDD cycle)
+Task 13: complete (commits 7a4241b..d522e83, review clean, no findings)
+Task 14: complete — mobile 144/144 tests green, tsc --noEmit clean (exit 0), backend mvn test -Dtest='!*IntegrationTest' -q exit 0. PatientContactIntegrationTest not run here (Docker unavailable), already independently verified correct by Task 5's reviewer.
+Task 15: complete — 3 contacts seeded for María González López (27915e09-9045-44e0-99d4-70789ab78e6d) via real API: Ana Martínez/FAMILY/Hija, Dr. Pablo Rojas/DOCTOR/Médico tratante, Luis Martínez/EMERGENCY/Hermano/priority=true. Verified via GET listing. ALL 15 TASKS COMPLETE.
+
+Revisión final de rama: APROBADA (Ready to merge: With fixes → aplicado). Verificado end-to-end: arquitectura hexagonal pura en ambas capas, contrato PatientContact idéntico campo a campo entre mobile y backend, autorización enforced solo en el servicio (owner crea/edita, owner+colaborador lista), ambas correcciones intra-tarea (Task 9 testID fix, Task 10 loading guard) verificadas independientemente como correctas y sin efectos secundarios. "No incluye" del spec respetado (sin Ver detalle, sin eliminar contacto, emergencyContact intacto).
+Important encontrado y corregido: el botón "Editar" de cada contacto se mostraba a colaboradores (que no pueden editar por regla de negocio) de forma inconsistente con "Agregar contacto" que sí estaba bien restringido a owner — no era un hueco de seguridad (el backend ya bloqueaba el guardado) pero sí una afordancia engañosa. Fix aplicado (commit 1a2173f): PatientContactCard ahora recibe isOwner y solo muestra "Editar" si es owner, "Llamar" sigue siempre visible. Re-revisión confirmó la corrección: 145/145 tests, tsc limpio, sin regresiones.
+Minor no bloqueantes (triage del revisor final): (1) falta test dedicado para el guard "contacto no pertenece al paciente" en el update — vale la pena agregarlo a futuro, no bloqueante; (2) categoría inválida en el DTO deja pasar validación @NotNull y revienta con mensaje crudo de Java enum en vez de uno más amable — cosmético; el resto (schema.sql sin comentario de enum, save() devuelve el input sin cambios, sin testID en PatientContactCard, ListHeaderComponent sin extraer, spinner indefinido si contactId no matchea, listContacts trae la lista completa) confirmados como aceptables/ya existentes en el patrón del repo.
+
+RAMA COMPLETA: 15 tareas + 1 fix post-revisión-final, todas aprobadas. Trabajado directo en main (decisión del usuario). Ready to merge: Yes.
