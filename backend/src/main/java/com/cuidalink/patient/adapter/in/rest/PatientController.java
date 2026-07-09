@@ -37,6 +37,8 @@ public class PatientController {
     @PostMapping
     public ResponseEntity<PatientResponse> create(@AuthenticationPrincipal User user,
                                                   @Validated @RequestBody CreatePatientRequest req) {
+        System.out.println(">>> IN  POST /patients userId=" + user.getId().value());
+        // Nota: no se loguean healthCondition/allergies del body (regla de negocio, CLAUDE.md).
         var patient = createUseCase.execute(new CreatePatientUseCase.CreatePatientCommand(
             req.fullName(),
             req.birthDate(),
@@ -50,12 +52,16 @@ public class PatientController {
             new EmergencyContact(req.emergencyContact().name(), req.emergencyContact().phone()),
             user.getId()
         ));
+        System.out.println(">>> OUT POST /patients -> 201 id=" + patient.getId().value());
         return ResponseEntity.status(201).body(toResponse(patient, true));
     }
 
     @GetMapping
     public ResponseEntity<List<PatientResponse>> list(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(listUseCase.listPatients(user.getId()).stream()
+        System.out.println(">>> IN  GET /patients userId=" + user.getId().value());
+        var patients = listUseCase.listPatients(user.getId());
+        System.out.println(">>> OUT GET /patients -> 200 count=" + patients.size());
+        return ResponseEntity.ok(patients.stream()
             .map(p -> toResponse(p, p.isOwner(user.getId())))
             .toList());
     }
@@ -63,7 +69,9 @@ public class PatientController {
     @GetMapping("/{id}")
     public ResponseEntity<PatientResponse> get(@AuthenticationPrincipal User user,
                                                @PathVariable String id) {
+        System.out.println(">>> IN  GET /patients/" + id);
         var patient = findUseCase.findPatient(new PatientId(UUID.fromString(id)), user.getId());
+        System.out.println(">>> OUT GET /patients/" + id + " -> 200");
         return ResponseEntity.ok(toResponse(patient, patient.isOwner(user.getId())));
     }
 
@@ -71,6 +79,8 @@ public class PatientController {
     public ResponseEntity<PatientResponse> update(@AuthenticationPrincipal User user,
                                                   @PathVariable String id,
                                                   @Validated @RequestBody UpdatePatientRequest req) {
+        System.out.println(">>> IN  PUT /patients/" + id);
+        // Nota: no se loguean healthCondition/allergies del body (regla de negocio, CLAUDE.md).
         var patient = updateUseCase.updatePatient(new UpdatePatientUseCase.UpdatePatientCommand(
             new PatientId(UUID.fromString(id)),
             req.fullName(),
@@ -85,13 +95,16 @@ public class PatientController {
             new EmergencyContact(req.emergencyContact().name(), req.emergencyContact().phone()),
             user.getId()
         ));
+        System.out.println(">>> OUT PUT /patients/" + id + " -> 200");
         return ResponseEntity.ok(toResponse(patient, true));
     }
 
     @PatchMapping("/{id}/archive")
     public ResponseEntity<Void> archive(@AuthenticationPrincipal User user,
                                         @PathVariable String id) {
+        System.out.println(">>> IN  PATCH /patients/" + id + "/archive");
         archiveUseCase.archivePatient(new PatientId(UUID.fromString(id)), user.getId());
+        System.out.println(">>> OUT PATCH /patients/" + id + "/archive -> 204");
         return ResponseEntity.noContent().build();
     }
 

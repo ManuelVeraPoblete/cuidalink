@@ -36,10 +36,12 @@ public class PatientContactController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @Validated @RequestBody CreatePatientContactRequest req) {
+        System.out.println(">>> IN  POST /patients/" + patientId + "/contacts");
         var patId = new PatientId(UUID.fromString(patientId));
         var contact = createUseCase.execute(new CreatePatientContactUseCase.CreatePatientContactCommand(
             patId, req.name(), PatientContactCategory.valueOf(req.category()), req.relationship(),
             req.phone(), req.email(), req.note(), req.priority(), user.getId()));
+        System.out.println(">>> OUT POST /patients/" + patientId + "/contacts -> 201 id=" + contact.getId().value());
         return ResponseEntity.status(201).body(toResponse(contact));
     }
 
@@ -47,9 +49,11 @@ public class PatientContactController {
     public ResponseEntity<List<PatientContactResponse>> list(
             @AuthenticationPrincipal User user,
             @PathVariable String patientId) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/contacts");
         var patId = new PatientId(UUID.fromString(patientId));
-        return ResponseEntity.ok(listUseCase.list(patId, user.getId())
-            .stream().map(this::toResponse).toList());
+        var contacts = listUseCase.list(patId, user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/contacts -> 200 count=" + contacts.size());
+        return ResponseEntity.ok(contacts.stream().map(this::toResponse).toList());
     }
 
     @PutMapping("/{contactId}")
@@ -58,11 +62,13 @@ public class PatientContactController {
             @PathVariable String patientId,
             @PathVariable String contactId,
             @Validated @RequestBody UpdatePatientContactRequest req) {
+        System.out.println(">>> IN  PUT /patients/" + patientId + "/contacts/" + contactId);
         var patId = new PatientId(UUID.fromString(patientId));
         var contact = updateUseCase.execute(new UpdatePatientContactUseCase.UpdatePatientContactCommand(
             patId, new PatientContactId(UUID.fromString(contactId)), req.name(),
             PatientContactCategory.valueOf(req.category()), req.relationship(), req.phone(),
             req.email(), req.note(), req.priority(), user.getId()));
+        System.out.println(">>> OUT PUT /patients/" + patientId + "/contacts/" + contactId + " -> 200");
         return ResponseEntity.ok(toResponse(contact));
     }
 

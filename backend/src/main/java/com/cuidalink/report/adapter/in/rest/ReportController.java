@@ -29,12 +29,14 @@ public class ReportController {
             @PathVariable String id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        System.out.println(">>> IN  GET /patients/" + id + "/reports/pdf from=" + from + " to=" + to);
 
         var pdf = generateUseCase.generate(
             new PatientId(UUID.fromString(id)),
             user.getId(),
             new DateRange(from, to));
 
+        System.out.println(">>> OUT GET /patients/" + id + "/reports/pdf -> 200 bytes=" + pdf.length);
         return ResponseEntity.ok()
             .header("Content-Disposition", "attachment; filename=informe-cuidalink.pdf")
             .body(pdf);

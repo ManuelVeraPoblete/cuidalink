@@ -42,10 +42,12 @@ public class CareTaskLogController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/task-logs date=" + date);
         var patId = new PatientId(UUID.fromString(patientId));
         var logs = logsUseCase.getLogs(patId, date, user.getId());
         var tasksById = listTasksUseCase.listTasks(patId, user.getId())
             .stream().collect(Collectors.toMap(CareTask::getId, Function.identity()));
+        System.out.println(">>> OUT GET /patients/" + patientId + "/task-logs -> 200 count=" + logs.size());
         return ResponseEntity.ok(logs.stream().map(log -> toResponse(log, tasksById)).toList());
     }
 
@@ -53,10 +55,12 @@ public class CareTaskLogController {
     public ResponseEntity<CareTaskLogResponse> complete(
             @AuthenticationPrincipal User user,
             @PathVariable String logId) {
+        System.out.println(">>> IN  PATCH /task-logs/" + logId + "/complete");
         var log = completeUseCase.complete(new CareTaskLogId(UUID.fromString(logId)), user.getId());
         var task = listTasksUseCase.listTasks(log.getPatientId(), user.getId())
             .stream().filter(t -> t.getId().equals(log.getCareTaskId())).findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada"));
+        System.out.println(">>> OUT PATCH /task-logs/" + logId + "/complete -> 200");
         return ResponseEntity.ok(toResponse(log, Map.of(task.getId(), task)));
     }
 

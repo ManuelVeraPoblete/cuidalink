@@ -36,9 +36,11 @@ public class BitacoraEntryController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @Validated @RequestBody CreateBitacoraEntryRequest req) {
+        System.out.println(">>> IN  POST /patients/" + patientId + "/bitacora-entries");
         var patId = new PatientId(UUID.fromString(patientId));
         var entry = createUseCase.create(new CreateBitacoraEntryUseCase.CreateBitacoraEntryCommand(
             patId, user.getId(), req.note()));
+        System.out.println(">>> OUT POST /patients/" + patientId + "/bitacora-entries -> 201 id=" + entry.getId().value());
         return ResponseEntity.status(201).body(toResponse(entry));
     }
 
@@ -49,10 +51,12 @@ public class BitacoraEntryController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(required = false) String type) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/bitacora-entries from=" + from + " to=" + to + " type=" + type);
         var patId = new PatientId(UUID.fromString(patientId));
         var entryType = type == null ? null : BitacoraEntryType.valueOf(type.toUpperCase());
-        return ResponseEntity.ok(listUseCase.list(patId, from, to, entryType, user.getId())
-            .stream().map(this::toResponse).toList());
+        var entries = listUseCase.list(patId, from, to, entryType, user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/bitacora-entries -> 200 count=" + entries.size());
+        return ResponseEntity.ok(entries.stream().map(this::toResponse).toList());
     }
 
     private BitacoraEntryResponse toResponse(BitacoraEntry e) {

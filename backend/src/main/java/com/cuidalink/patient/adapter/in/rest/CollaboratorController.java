@@ -29,8 +29,10 @@ public class CollaboratorController {
     @GetMapping
     public ResponseEntity<List<CollaboratorResponse>> list(@AuthenticationPrincipal User user,
                                                            @PathVariable String patientId) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/collaborators");
         var collaborators = listUseCase.listCollaborators(
             new PatientId(UUID.fromString(patientId)), user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/collaborators -> 200 count=" + collaborators.size());
         return ResponseEntity.ok(collaborators.stream()
             .map(c -> new CollaboratorResponse(
                 c.userId().value().toString(),
@@ -42,11 +44,13 @@ public class CollaboratorController {
     public ResponseEntity<Void> revoke(@AuthenticationPrincipal User user,
                                        @PathVariable String patientId,
                                        @PathVariable String collaboratorId) {
+        System.out.println(">>> IN  DELETE /patients/" + patientId + "/collaborators/" + collaboratorId);
         revokeUseCase.revoke(
             new PatientId(UUID.fromString(patientId)),
             new UserId(UUID.fromString(collaboratorId)),
             user.getId()
         );
+        System.out.println(">>> OUT DELETE /patients/" + patientId + "/collaborators/" + collaboratorId + " -> 204");
         return ResponseEntity.noContent().build();
     }
 }

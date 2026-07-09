@@ -41,11 +41,13 @@ public class CareTaskController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @Validated @RequestBody CreateCareTaskRequest req) {
+        System.out.println(">>> IN  POST /patients/" + patientId + "/tasks");
         var patId = new PatientId(UUID.fromString(patientId));
         var task = createUseCase.execute(new CreateCareTaskUseCase.CreateCareTaskCommand(
             patId, req.name(), req.instructions() != null ? req.instructions() : "",
             toScheduleDomain(req.schedule()), req.priority(), req.reminderActive(), user.getId()
         ));
+        System.out.println(">>> OUT POST /patients/" + patientId + "/tasks -> 201 id=" + task.getId().value());
         return ResponseEntity.status(201).body(toResponse(task));
     }
 
@@ -53,9 +55,11 @@ public class CareTaskController {
     public ResponseEntity<List<CareTaskResponse>> list(
             @AuthenticationPrincipal User user,
             @PathVariable String patientId) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/tasks");
         var patId = new PatientId(UUID.fromString(patientId));
-        return ResponseEntity.ok(listUseCase.listTasks(patId, user.getId())
-            .stream().map(this::toResponse).toList());
+        var tasks = listUseCase.listTasks(patId, user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/tasks -> 200 count=" + tasks.size());
+        return ResponseEntity.ok(tasks.stream().map(this::toResponse).toList());
     }
 
     @GetMapping("/{taskId}")
@@ -63,8 +67,10 @@ public class CareTaskController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @PathVariable String taskId) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/tasks/" + taskId);
         var patId = new PatientId(UUID.fromString(patientId));
         var task = getUseCase.getTask(patId, new CareTaskId(UUID.fromString(taskId)), user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/tasks/" + taskId + " -> 200");
         return ResponseEntity.ok(toResponse(task));
     }
 
@@ -74,12 +80,14 @@ public class CareTaskController {
             @PathVariable String patientId,
             @PathVariable String taskId,
             @Validated @RequestBody UpdateCareTaskRequest req) {
+        System.out.println(">>> IN  PUT /patients/" + patientId + "/tasks/" + taskId);
         var patId = new PatientId(UUID.fromString(patientId));
         var task = updateUseCase.updateTask(new UpdateCareTaskUseCase.UpdateCareTaskCommand(
             patId, new CareTaskId(UUID.fromString(taskId)), req.name(),
             req.instructions() != null ? req.instructions() : "",
             toScheduleDomain(req.schedule()), req.priority(), req.reminderActive(), user.getId()
         ));
+        System.out.println(">>> OUT PUT /patients/" + patientId + "/tasks/" + taskId + " -> 200");
         return ResponseEntity.ok(toResponse(task));
     }
 
@@ -88,7 +96,9 @@ public class CareTaskController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @PathVariable String taskId) {
+        System.out.println(">>> IN  PATCH /patients/" + patientId + "/tasks/" + taskId + "/deactivate");
         deactivateUseCase.deactivate(new CareTaskId(UUID.fromString(taskId)), user.getId());
+        System.out.println(">>> OUT PATCH /patients/" + patientId + "/tasks/" + taskId + "/deactivate -> 204");
         return ResponseEntity.noContent().build();
     }
 

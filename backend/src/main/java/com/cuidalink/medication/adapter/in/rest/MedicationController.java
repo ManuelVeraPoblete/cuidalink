@@ -40,6 +40,7 @@ public class MedicationController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @Validated @RequestBody CreateMedicationRequest req) {
+        System.out.println(">>> IN  POST /patients/" + patientId + "/medications");
         var patId = new PatientId(UUID.fromString(patientId));
         var medication = createUseCase.execute(new CreateMedicationUseCase.CreateMedicationCommand(
             patId,
@@ -49,6 +50,7 @@ public class MedicationController {
             toScheduleDomain(req.schedule()),
             user.getId()
         ));
+        System.out.println(">>> OUT POST /patients/" + patientId + "/medications -> 201 id=" + medication.getId().value());
         return ResponseEntity.status(201).body(toResponse(medication));
     }
 
@@ -56,9 +58,11 @@ public class MedicationController {
     public ResponseEntity<List<MedicationResponse>> list(
             @AuthenticationPrincipal User user,
             @PathVariable String patientId) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/medications");
         var patId = new PatientId(UUID.fromString(patientId));
-        return ResponseEntity.ok(listUseCase.listMedications(patId, user.getId())
-            .stream().map(this::toResponse).toList());
+        var medications = listUseCase.listMedications(patId, user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/medications -> 200 count=" + medications.size());
+        return ResponseEntity.ok(medications.stream().map(this::toResponse).toList());
     }
 
     @GetMapping("/{medId}")
@@ -66,9 +70,11 @@ public class MedicationController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @PathVariable String medId) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/medications/" + medId);
         var patId = new PatientId(UUID.fromString(patientId));
         var medication = getUseCase.getMedication(
             patId, new MedicationId(UUID.fromString(medId)), user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/medications/" + medId + " -> 200");
         return ResponseEntity.ok(toResponse(medication));
     }
 
@@ -78,6 +84,7 @@ public class MedicationController {
             @PathVariable String patientId,
             @PathVariable String medId,
             @Validated @RequestBody UpdateMedicationRequest req) {
+        System.out.println(">>> IN  PUT /patients/" + patientId + "/medications/" + medId);
         var patId = new PatientId(UUID.fromString(patientId));
         var medication = updateUseCase.updateMedication(new UpdateMedicationUseCase.UpdateMedicationCommand(
             patId,
@@ -88,6 +95,7 @@ public class MedicationController {
             toScheduleDomain(req.schedule()),
             user.getId()
         ));
+        System.out.println(">>> OUT PUT /patients/" + patientId + "/medications/" + medId + " -> 200");
         return ResponseEntity.ok(toResponse(medication));
     }
 
@@ -96,7 +104,9 @@ public class MedicationController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @PathVariable String medId) {
+        System.out.println(">>> IN  PATCH /patients/" + patientId + "/medications/" + medId + "/deactivate");
         deactivateUseCase.deactivate(new MedicationId(UUID.fromString(medId)), user.getId());
+        System.out.println(">>> OUT PATCH /patients/" + patientId + "/medications/" + medId + "/deactivate -> 204");
         return ResponseEntity.noContent().build();
     }
 

@@ -27,35 +27,46 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@Validated @RequestBody RegisterRequest req) {
+        System.out.println(">>> IN  POST /auth/register email=" + req.email());
         String token = registerUseCase.execute(
             new RegisterUserUseCase.RegisterUserCommand(req.name(), req.email(), req.password()));
+        System.out.println(">>> OUT POST /auth/register -> 200");
         return ResponseEntity.ok(new TokenResponse(token));
     }
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Validated @RequestBody LoginRequest req) {
+        System.out.println(">>> IN  POST /auth/login email=" + req.email());
         String token = loginUseCase.login(req.email(), req.password());
+        System.out.println(">>> OUT POST /auth/login -> 200");
         return ResponseEntity.ok(new TokenResponse(token));
     }
 
     @PostMapping("/fcm-token")
     public ResponseEntity<Void> updateFcmToken(@AuthenticationPrincipal User user,
                                                 @Validated @RequestBody FcmTokenRequest req) {
+        System.out.println(">>> IN  POST /auth/fcm-token userId=" + user.getId().value());
         fcmTokenUseCase.update(user.getId(), req.token());
+        System.out.println(">>> OUT POST /auth/fcm-token -> 204");
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
     public ResponseEntity<AuthResponse> me(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(toResponse(user));
+        System.out.println(">>> IN  GET /auth/me userId=" + user.getId().value());
+        var response = ResponseEntity.ok(toResponse(user));
+        System.out.println(">>> OUT GET /auth/me -> 200");
+        return response;
     }
 
     @PatchMapping("/me")
     public ResponseEntity<AuthResponse> updateMe(@AuthenticationPrincipal User user,
                                                   @Validated @RequestBody UpdateProfileRequest req) {
+        System.out.println(">>> IN  PATCH /auth/me userId=" + user.getId().value());
         var updated = updateProfileUseCase.execute(user.getId(),
             new UpdateProfileUseCase.UpdateProfileCommand(
                 req.name(), req.email(), req.phone(), req.address(), req.specialty(), req.experience()));
+        System.out.println(">>> OUT PATCH /auth/me -> 200");
         return ResponseEntity.ok(toResponse(updated));
     }
 

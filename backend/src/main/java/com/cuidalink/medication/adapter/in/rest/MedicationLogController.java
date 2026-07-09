@@ -49,10 +49,12 @@ public class MedicationLogController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/medication-logs date=" + date);
         var patId = new PatientId(UUID.fromString(patientId));
         var logs = logsUseCase.getLogs(patId, date, user.getId());
         var medicationsById = listMedicationsUseCase.listMedications(patId, user.getId())
             .stream().collect(Collectors.toMap(Medication::getId, Function.identity()));
+        System.out.println(">>> OUT GET /patients/" + patientId + "/medication-logs -> 200 count=" + logs.size());
         return ResponseEntity.ok(logs.stream().map(log -> toResponse(log, medicationsById)).toList());
     }
 
@@ -61,12 +63,14 @@ public class MedicationLogController {
             @AuthenticationPrincipal User user,
             @PathVariable String logId,
             @Validated @RequestBody ConfirmLogRequest req) {
+        System.out.println(">>> IN  PATCH /medication-logs/" + logId + " status=" + req.status());
         var log = confirmUseCase.confirm(
             new MedicationLogId(UUID.fromString(logId)),
             user.getId(),
             req.status()
         );
         var medication = getMedicationUseCase.getMedication(log.getPatientId(), log.getMedicationId(), user.getId());
+        System.out.println(">>> OUT PATCH /medication-logs/" + logId + " -> 200 status=" + log.getStatus());
         return ResponseEntity.ok(toResponse(log, Map.of(medication.getId(), medication)));
     }
 

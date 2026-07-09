@@ -38,9 +38,11 @@ public class VitalDefinitionController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @Validated @RequestBody CreateVitalDefinitionRequest req) {
+        System.out.println(">>> IN  POST /patients/" + patientId + "/vital-definitions");
         var patId = new PatientId(UUID.fromString(patientId));
         var def = createUseCase.execute(new CreateVitalDefinitionUseCase.CreateVitalDefinitionCommand(
             patId, req.name(), req.unit(), req.normalRangeMin(), req.normalRangeMax(), user.getId()));
+        System.out.println(">>> OUT POST /patients/" + patientId + "/vital-definitions -> 201 id=" + def.getId().value());
         return ResponseEntity.status(201).body(toResponse(def));
     }
 
@@ -48,9 +50,11 @@ public class VitalDefinitionController {
     public ResponseEntity<List<VitalDefinitionResponse>> list(
             @AuthenticationPrincipal User user,
             @PathVariable String patientId) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/vital-definitions");
         var patId = new PatientId(UUID.fromString(patientId));
-        return ResponseEntity.ok(listUseCase.list(patId, user.getId())
-            .stream().map(this::toResponse).toList());
+        var defs = listUseCase.list(patId, user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/vital-definitions -> 200 count=" + defs.size());
+        return ResponseEntity.ok(defs.stream().map(this::toResponse).toList());
     }
 
     @PutMapping("/{defId}")
@@ -59,12 +63,14 @@ public class VitalDefinitionController {
             @PathVariable String patientId,
             @PathVariable String defId,
             @Validated @RequestBody UpdateVitalDefinitionRequest req) {
+        System.out.println(">>> IN  PUT /patients/" + patientId + "/vital-definitions/" + defId);
         var patId = new PatientId(UUID.fromString(patientId));
         var def = updateUseCase.execute(new UpdateVitalDefinitionUseCase.UpdateVitalDefinitionCommand(
             patId,
             new VitalSignDefinitionId(UUID.fromString(defId)),
             req.name(), req.unit(), req.normalRangeMin(), req.normalRangeMax(),
             user.getId()));
+        System.out.println(">>> OUT PUT /patients/" + patientId + "/vital-definitions/" + defId + " -> 200");
         return ResponseEntity.ok(toResponse(def));
     }
 
@@ -73,9 +79,11 @@ public class VitalDefinitionController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @PathVariable String defId) {
+        System.out.println(">>> IN  DELETE /patients/" + patientId + "/vital-definitions/" + defId);
         var patId = new PatientId(UUID.fromString(patientId));
         deleteUseCase.delete(
             new VitalSignDefinitionId(UUID.fromString(defId)), patId, user.getId());
+        System.out.println(">>> OUT DELETE /patients/" + patientId + "/vital-definitions/" + defId + " -> 204");
         return ResponseEntity.noContent().build();
     }
 

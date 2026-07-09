@@ -38,6 +38,7 @@ public class VitalRecordController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @Validated @RequestBody RecordVitalsRequest req) {
+        System.out.println(">>> IN  POST /patients/" + patientId + "/vital-records");
         var patId = new PatientId(UUID.fromString(patientId));
         var measurements = req.measurements().stream()
             .map(m -> new RecordVitalsUseCase.VitalMeasurementDto(
@@ -45,6 +46,7 @@ public class VitalRecordController {
             .toList();
         var record = recordUseCase.record(new RecordVitalsUseCase.RecordVitalsCommand(
             patId, user.getId(), measurements));
+        System.out.println(">>> OUT POST /patients/" + patientId + "/vital-records -> 201 id=" + record.getId().value());
         return ResponseEntity.status(201).body(toResponse(record));
     }
 
@@ -54,9 +56,11 @@ public class VitalRecordController {
             @PathVariable String patientId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/vital-records from=" + from + " to=" + to);
         var patId = new PatientId(UUID.fromString(patientId));
-        return ResponseEntity.ok(listUseCase.list(patId, from, to, user.getId())
-            .stream().map(this::toResponse).toList());
+        var records = listUseCase.list(patId, from, to, user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/vital-records -> 200 count=" + records.size());
+        return ResponseEntity.ok(records.stream().map(this::toResponse).toList());
     }
 
     @GetMapping("/{recordId}")
@@ -64,9 +68,11 @@ public class VitalRecordController {
             @AuthenticationPrincipal User user,
             @PathVariable String patientId,
             @PathVariable String recordId) {
+        System.out.println(">>> IN  GET /patients/" + patientId + "/vital-records/" + recordId);
         var patId = new PatientId(UUID.fromString(patientId));
         var record = getUseCase.getById(
             patId, new VitalRecordId(UUID.fromString(recordId)), user.getId());
+        System.out.println(">>> OUT GET /patients/" + patientId + "/vital-records/" + recordId + " -> 200");
         return ResponseEntity.ok(toResponse(record));
     }
 
