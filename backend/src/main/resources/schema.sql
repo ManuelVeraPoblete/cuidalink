@@ -216,3 +216,15 @@ CREATE INDEX idx_task_log_task              ON care_task_logs (care_task_id);
 
 -- patient_contacts: findByPatientId
 CREATE INDEX idx_patient_contacts_patient ON patient_contacts (patient_id);
+
+-- Bitácora: registro diario de notas/observaciones del cuidador
+CREATE TABLE bitacora_entries (
+    id          VARCHAR(36)  PRIMARY KEY,
+    patient_id  VARCHAR(36)  NOT NULL,
+    author_id   VARCHAR(36)  NOT NULL,
+    entry_type  VARCHAR(20)  NOT NULL,   -- enum: ENTRY, OBSERVATION
+    note        TEXT         NOT NULL,
+    recorded_at TIMESTAMP    NOT NULL,
+
+    CONSTRAINT fk_bitacora_patient FOREIGN KEY (patient_id) REFERENCES patients (id)
+);
