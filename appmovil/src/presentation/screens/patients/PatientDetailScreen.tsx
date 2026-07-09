@@ -92,6 +92,10 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
     navigation.navigate('Contacts', { patientId });
   }
 
+  function goToBitacora() {
+    navigation.navigate('Bitacora', { patientId });
+  }
+
   function goToComingSoon(title: string, subtitle: string) {
     navigation.navigate('ComingSoon', { title, subtitle });
   }
@@ -178,7 +182,7 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
           <ActionCard icon="medkit" color="#16a085" title="Medicamentos" subtitle="Dosis y horarios" onPress={goToMedicamentos} />
           <ActionCard icon="list" color="#7c5cfc" title="Tareas" subtitle="Cuidados diarios" onPress={goToTasks} />
           <ActionCard icon="pulse" color="#e74c3c" title="Signos vitales" subtitle="Registrar control" onPress={goToVitales} />
-          <ActionCard icon="clipboard" color="#f5a623" title="Bitácora" subtitle="Notas del cuidador" onPress={() => goToComingSoon('Bitácora', 'Notas del cuidador')} />
+          <ActionCard icon="clipboard" color="#f5a623" title="Bitácora" subtitle="Notas del cuidador" onPress={goToBitacora} />
           <ActionCard icon="call-outline" color="#2f6fed" title="Contactos" subtitle="Familia y médico" onPress={goToContacts} />
           <ActionCard icon="time" color="#2f6fed" title="Historial" subtitle="Actividad reciente" onPress={() => goToComingSoon('Historial', 'Actividad reciente')} fullWidth />
         </View>

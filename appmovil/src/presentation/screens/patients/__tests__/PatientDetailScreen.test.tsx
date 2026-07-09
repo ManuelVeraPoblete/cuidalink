@@ -107,6 +107,12 @@ describe('PatientDetailScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('Contacts', { patientId: 'p1' });
   });
 
+  it('navega a Bitacora al presionar esa tarjeta', async () => {
+    const { navigation } = renderScreen();
+    fireEvent.press(await screen.findByText('Bitácora'));
+    expect(navigation.navigate).toHaveBeenCalledWith('Bitacora', { patientId: 'p1' });
+  });
+
   it('navega a Today al presionar "Hoy"', async () => {
     const { navigation } = renderScreen();
     fireEvent.press(await screen.findByText('Hoy'));
