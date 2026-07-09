@@ -258,3 +258,45 @@ Important encontrado y corregido: el botón "Editar" de cada contacto se mostrab
 Minor no bloqueantes (triage del revisor final): (1) falta test dedicado para el guard "contacto no pertenece al paciente" en el update — vale la pena agregarlo a futuro, no bloqueante; (2) categoría inválida en el DTO deja pasar validación @NotNull y revienta con mensaje crudo de Java enum en vez de uno más amable — cosmético; el resto (schema.sql sin comentario de enum, save() devuelve el input sin cambios, sin testID en PatientContactCard, ListHeaderComponent sin extraer, spinner indefinido si contactId no matchea, listContacts trae la lista completa) confirmados como aceptables/ya existentes en el patrón del repo.
 
 RAMA COMPLETA: 15 tareas + 1 fix post-revisión-final, todas aprobadas. Trabajado directo en main (decisión del usuario). Ready to merge: Yes.
+
+---
+
+# CuidaLink — Bitácora (registro diario del cuidador) — Ledger de Progreso
+
+Plan: docs/superpowers/plans/2026-07-09-bitacora-feature-plan.md
+Rama: main (sin worktree, decisión explícita del usuario)
+Inicio: 2026-07-09
+Commit base: 5b29718
+
+Nota de entorno: Docker no está disponible en este entorno, por lo que `BitacoraIntegrationTest`
+(@Testcontainers) no se puede ejecutar aquí. Se verifica por compilación + revisión de código; el
+usuario deberá correrlo localmente donde haya Docker antes de mergear, o confiar en CI.
+
+## Tasks
+- [x] Task 1: Dominio BitacoraEntry
+- [x] Task 2: Puertos (in/out) de BitacoraEntry
+- [x] Task 3: BitacoraService (con test TDD)
+- [x] Task 4: Persistencia JPA + schema.sql
+- [x] Task 5: REST — DTOs, controller y test de integración
+- [x] Task 6: Entidad, repositorio y DI (mobile)
+- [x] Task 7: Util bitacoraDisplay.ts (TDD)
+- [x] Task 8: BitacoraEntryCard.tsx
+- [x] Task 9: BitacoraScreen.tsx (TDD)
+- [x] Task 10: AddBitacoraEntryScreen.tsx (TDD)
+- [x] Task 11: Registrar rutas y wiring en PatientDetailScreen
+- [x] Task 12: Suite completa y typecheck
+- [x] Task 13: Sembrar datos de Bitácora para Rosa Elena Martínez Silva
+
+Task 1: complete (commits 5b29718..9c6a5ce, review clean, no findings)
+Task 2: complete (commits 9c6a5ce..12239ef, review clean, no findings)
+Task 3: complete (commits 12239ef..7b62062, review clean, no findings — genuine TDD RED/GREEN verified)
+Task 4: complete (commits 7b62062..3a77e36, review clean, no findings — enum persistence + schema.sql append-only verified)
+Task 5: complete (commits 3a77e36..f2323d4, review clean, no findings — BACKEND COMPLETE (Tasks 1-5). BitacoraIntegrationTest NOT executed here, Docker unavailable; independently verified by the reviewer against real Task 1-4 signatures, logic sound. Minor (non-blocking, inherited from brief): no test for optional `type` query param filtering/invalid-value path.)
+Task 6: complete (commits f2323d4..ab8c4ad, review clean, no findings — also fixed a pre-existing tsconfig.json ignoreDeprecations mismatch (6.0→5.0) left over from the earlier expo install --fix TypeScript downgrade in this session, needed for tsc --noEmit to pass; reviewer confirmed this as a legitimate, minimal, non-scope-creep fix)
+Task 7: complete (commits ab8c4ad..b5d2d10, review clean, no findings — genuine TDD RED/GREEN verified)
+Task 8: complete (commits b5d2d10..c5f67c9, review clean, no findings)
+Task 9: complete (commits c5f67c9..7eab0ff, review clean, no findings — genuine TDD RED/GREEN, 6/6 tests. Expected tsc errors (4, all missing-route Bitacora/AddBitacoraEntry, resolved by Task 11) independently re-verified by reviewer as the only errors. Minor non-blocking, inherited from ContactsScreen pattern: no error-state handling on failed queries, isLoading only gates entries not patient query.)
+Task 10: complete (commits 7eab0ff..f085b5b, review clean, no findings — genuine TDD RED/GREEN, 3/3 tests. Expected tsc errors now 7 total project-wide (4 from Task 9 + 3 new), all missing-route only, resolved by Task 11.)
+Task 11: complete (commits f085b5b..7444f73, review clean, no findings — tsc 7→0 errors, 15/15 PatientDetailScreen tests, Historial card untouched, Bitácora fully wired end-to-end)
+Task 12: complete (verification only, done by controller directly — no code changes). Mobile: tsc --noEmit clean (0 errors), full jest suite 156/157 passing (1 flaky pre-existing timeout in RecordVitalsScreen.test.tsx unrelated to Bitácora, confirmed passing 8/8 in isolation — not a regression). Backend: mvn compile -q clean, mvn test -Dtest='!*IntegrationTest' -q exit 0 (all non-Testcontainers tests green).
+Task 13: complete (done by controller directly via psql — no code changes). 5 entries seeded for Rosa Elena Martínez Silva (e76adb91-17ae-4813-be90-c98d54c691a6), authored by owner fdd31f00-fd4c-431b-8e67-4719fdbd8e5a: 3 ENTRY + 2 OBSERVATION, dated 2026-07-09/07-08 (within "Últimos 7 días" default) plus one 2026-06-29 (10 days back, only visible under "Últimos 30 días"/"Todo"). Verified via SELECT. Minor cosmetic note: exact clock times differ from the mockup's 08:15/12:40/17:20/21:10 due to Postgres TIME-literal-as-interval-addition semantics in the seed SQL causing date/time rollover — dates/ranges are still correct for demoing all filter presets, not a functional issue. ALL 13 TASKS COMPLETE.
