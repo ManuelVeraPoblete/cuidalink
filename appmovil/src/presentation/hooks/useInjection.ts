@@ -6,6 +6,7 @@ import { ApiVitalRepository } from '@/data/repositories/ApiVitalRepository';
 import { ApiReportRepository } from '@/data/repositories/ApiReportRepository';
 import { ApiCareTaskRepository } from '@/data/repositories/ApiCareTaskRepository';
 import { ApiPatientContactRepository } from '@/data/repositories/ApiPatientContactRepository';
+import { ApiBitacoraEntryRepository } from '@/data/repositories/ApiBitacoraEntryRepository';
 import { LoginUseCaseImpl } from '@/domain/usecases/auth/LoginUseCase';
 import { RegisterUseCaseImpl } from '@/domain/usecases/auth/RegisterUseCase';
 import { ConfirmMedicationLogUseCaseImpl } from '@/domain/usecases/medication/ConfirmMedicationLogUseCase';
@@ -20,6 +21,7 @@ export function useInjection() {
     const reportRepo = new ApiReportRepository();
     const careTaskRepo = new ApiCareTaskRepository();
     const patientContactRepo = new ApiPatientContactRepository();
+    const bitacoraEntryRepo = new ApiBitacoraEntryRepository();
 
     return {
       authRepo,
@@ -29,6 +31,7 @@ export function useInjection() {
       reportRepo,
       careTaskRepo,
       patientContactRepo,
+      bitacoraEntryRepo,
       loginUseCase: new LoginUseCaseImpl(authRepo),
       registerUseCase: new RegisterUseCaseImpl(authRepo),
       confirmMedLogUseCase: new ConfirmMedicationLogUseCaseImpl(medicationRepo),

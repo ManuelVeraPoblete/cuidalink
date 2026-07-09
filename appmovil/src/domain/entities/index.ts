@@ -9,3 +9,4 @@ export * from './VitalRecord';
 export * from './CareTask';
 export * from './CareTaskLog';
 export * from './PatientContact';
+export * from './BitacoraEntry';
