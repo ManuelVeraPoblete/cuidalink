@@ -10,6 +10,7 @@ import { pickVitalIcon } from '@/domain/utils/vitalDisplay';
 import { DEFAULT_VITAL_DEFINITIONS } from '@/domain/utils/defaultVitalDefinitions';
 import PatientChip from '@/presentation/components/PatientChip';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import ErrorState from '@/presentation/components/ErrorState';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'RecordVitals'>;
@@ -32,7 +33,7 @@ export default function RecordVitalsScreen({ navigation, route }: Props) {
     queryFn: () => patientRepo.getPatient(patientId),
   });
 
-  const { data: definitions, isLoading } = useQuery({
+  const { data: definitions, isLoading, isError, refetch } = useQuery({
     queryKey: ['vital-definitions', patientId],
     queryFn: () => vitalRepo.listDefinitions(patientId),
   });
@@ -75,6 +76,7 @@ export default function RecordVitalsScreen({ navigation, route }: Props) {
   };
 
   if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#5ee7df" /></ScreenBackground>;
+  if (isError) return <ScreenBackground><ErrorState onRetry={() => refetch()} onBack={() => navigation.goBack()} /></ScreenBackground>;
 
   return (
     <ScreenBackground>

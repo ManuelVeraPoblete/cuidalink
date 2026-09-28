@@ -11,6 +11,7 @@ import TaskCard from '@/presentation/components/TaskCard';
 import TaskActionModal from '@/presentation/components/TaskActionModal';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
 import { localDateString } from '@/domain/utils/localDate';
+import ErrorState from '@/presentation/components/ErrorState';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'Tasks'>;
@@ -31,7 +32,7 @@ export default function TasksScreen({ navigation }: Props) {
   const [tab, setTab] = useState<Tab>('ALL');
   const [selectedLog, setSelectedLog] = useState<CareTaskLog | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['care-task-logs', selectedPatientId, today],
     queryFn: () =>
       selectedPatientId
@@ -60,6 +61,7 @@ export default function TasksScreen({ navigation }: Props) {
   }
 
   if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" /></ScreenBackground>;
+  if (isError) return <ScreenBackground><ErrorState onRetry={() => refetch()} onBack={() => navigation.goBack()} /></ScreenBackground>;
 
   const filtered = (data ?? []).filter((log) => matchesTab(log.status, tab));
   const todayLabel = new Date().toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });

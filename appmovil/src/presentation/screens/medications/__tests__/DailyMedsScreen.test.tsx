@@ -95,3 +95,24 @@ describe('DailyMedsScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('CreateMedication');
   });
 });
+
+describe('DailyMedsScreen con error de carga', () => {
+  beforeEach(() => useAuthStore.setState({ selectedPatientId: 'p1' }));
+
+  it('muestra el estado de error y reintenta la carga', async () => {
+    const primary = jest.fn().mockRejectedValueOnce(new Error('Network Error')).mockResolvedValue([]);
+    mockedUseInjection.mockReturnValue({ medicationRepo: { getDailyLogs: primary, confirmLog: jest.fn(), missLog: jest.fn() } });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <DailyMedsScreen navigation={{ navigate: jest.fn(), goBack: jest.fn() } as any} />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText('No pudimos cargar la información')).toBeTruthy();
+    expect(screen.queryByText('Sin medicamentos para mostrar.')).toBeNull();
+    fireEvent.press(screen.getByText('Reintentar'));
+    await waitFor(() => expect(primary).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByText('No pudimos cargar la información')).toBeNull(), { timeout: 5000 });
+  });
+});

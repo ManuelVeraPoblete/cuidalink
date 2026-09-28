@@ -10,6 +10,7 @@ import { PatientContact, PatientContactCategory } from '@/domain/entities';
 import PatientContactCard from '@/presentation/components/PatientContactCard';
 import PatientChip from '@/presentation/components/PatientChip';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import ErrorState from '@/presentation/components/ErrorState';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'Contacts'>;
@@ -35,7 +36,7 @@ export default function ContactsScreen({ navigation, route }: Props) {
     queryFn: () => patientRepo.getPatient(patientId),
   });
 
-  const { data: contacts, isLoading } = useQuery({
+  const { data: contacts, isLoading, isError, refetch } = useQuery({
     queryKey: ['patient-contacts', patientId],
     queryFn: () => patientContactRepo.listContacts(patientId),
   });
@@ -46,6 +47,7 @@ export default function ContactsScreen({ navigation, route }: Props) {
   );
 
   if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#5ee7df" /></ScreenBackground>;
+  if (isError) return <ScreenBackground><ErrorState onRetry={() => refetch()} onBack={() => navigation.goBack()} /></ScreenBackground>;
 
   return (
     <ScreenBackground>

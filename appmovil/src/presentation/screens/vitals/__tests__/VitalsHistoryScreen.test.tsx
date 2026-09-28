@@ -123,3 +123,24 @@ describe('VitalsHistoryScreen', () => {
     expect(await screen.findByText('Selecciona un paciente desde Inicio → Mis pacientes.')).toBeTruthy();
   });
 });
+
+describe('VitalsHistoryScreen con error de carga', () => {
+  beforeEach(() => useAuthStore.setState({ selectedPatientId: 'p1' }));
+
+  it('muestra el estado de error y reintenta la carga', async () => {
+    const primary = jest.fn().mockRejectedValueOnce(new Error('Network Error')).mockResolvedValue([]);
+    mockedUseInjection.mockReturnValue({ vitalRepo: { listRecords: primary, listDefinitions: jest.fn().mockResolvedValue(definitions) }, patientRepo: { getPatient: jest.fn().mockResolvedValue(patient) } });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <VitalsHistoryScreen navigation={{ navigate: jest.fn(), goBack: jest.fn() } as any} />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText('No pudimos cargar la información')).toBeTruthy();
+    expect(screen.queryByText('Sin registros para este día.')).toBeNull();
+    fireEvent.press(screen.getByText('Reintentar'));
+    await waitFor(() => expect(primary).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByText('No pudimos cargar la información')).toBeNull(), { timeout: 5000 });
+  });
+});

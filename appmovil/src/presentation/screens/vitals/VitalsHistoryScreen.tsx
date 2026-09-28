@@ -12,6 +12,7 @@ import VitalCard from '@/presentation/components/VitalCard';
 import VitalRecordDetailModal from '@/presentation/components/VitalRecordDetailModal';
 import PatientChip from '@/presentation/components/PatientChip';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import ErrorState from '@/presentation/components/ErrorState';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'Vitales'>;
@@ -47,7 +48,7 @@ export default function VitalsHistoryScreen({ navigation }: Props) {
     enabled: !!selectedPatientId,
   });
 
-  const { data: records, isLoading } = useQuery({
+  const { data: records, isLoading, isError, refetch } = useQuery({
     queryKey: ['vital-records', selectedPatientId, dateStr],
     queryFn: () => vitalRepo.listRecords(selectedPatientId!, dateStr, dateStr),
     enabled: !!selectedPatientId,
@@ -70,6 +71,7 @@ export default function VitalsHistoryScreen({ navigation }: Props) {
   }
 
   if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#5ee7df" /></ScreenBackground>;
+  if (isError) return <ScreenBackground><ErrorState onRetry={() => refetch()} onBack={() => navigation.goBack()} /></ScreenBackground>;
 
   return (
     <ScreenBackground>

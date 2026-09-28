@@ -11,6 +11,7 @@ import JoinCodeDialog from '@/presentation/components/JoinCodeDialog';
 import { calcAge, nextPendingLog, needsAttention } from '@/domain/utils/patientDisplay';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
 import { localDateString } from '@/domain/utils/localDate';
+import ErrorState from '@/presentation/components/ErrorState';
 
 type Props = { navigation: NativeStackNavigationProp<PatientStackParams, 'Pacientes'> };
 
@@ -112,7 +113,7 @@ export default function PatientsListScreen({ navigation }: Props) {
   const { patientRepo } = useInjection();
   const queryClient = useQueryClient();
   const [joinVisible, setJoinVisible] = useState(false);
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['patients'],
     queryFn: () => patientRepo.listPatients(),
   });
@@ -132,7 +133,7 @@ export default function PatientsListScreen({ navigation }: Props) {
   }
 
   if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" /></ScreenBackground>;
-  if (error) return <ScreenBackground><View style={styles.center}><Text style={styles.errorText}>Error al cargar pacientes</Text></View></ScreenBackground>;
+  if (isError) return <ScreenBackground><ErrorState onRetry={() => refetch()} onBack={() => navigation.goBack()} /></ScreenBackground>;
 
   return (
     <ScreenBackground>
@@ -214,8 +215,6 @@ export default function PatientsListScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { color: '#ff8a8a' },
   empty: { textAlign: 'center', color: '#e2e8f0', marginTop: 40, lineHeight: 20 },
 
   joinButton: {

@@ -9,6 +9,7 @@ import { useAuthStore } from '@/presentation/stores/authStore';
 import { calcAge, nextPendingLog, needsAttention } from '@/domain/utils/patientDisplay';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
 import { localDateString } from '@/domain/utils/localDate';
+import ErrorState from '@/presentation/components/ErrorState';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'PatientDetail'>;
@@ -49,7 +50,7 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
   const setSelectedPatientId = useAuthStore((s) => s.setSelectedPatientId);
   const today = localDateString();
 
-  const { data: patient, isLoading } = useQuery({
+  const { data: patient, isLoading, isError, refetch } = useQuery({
     queryKey: ['patient', patientId],
     queryFn: () => patientRepo.getPatient(patientId),
   });
@@ -60,7 +61,7 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
   });
 
   if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" /></ScreenBackground>;
-  if (!patient) return null;
+  if (isError || !patient) return <ScreenBackground><ErrorState onRetry={() => refetch()} onBack={() => navigation.goBack()} /></ScreenBackground>;
 
   const next = nextPendingLog(logs);
   const attention = needsAttention(logs);

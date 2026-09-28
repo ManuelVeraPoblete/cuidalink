@@ -165,3 +165,21 @@ describe('RecordVitalsScreen', () => {
     expect(createDefinition).not.toHaveBeenCalled();
   });
 });
+
+describe('RecordVitalsScreen con error de carga', () => {
+  it('muestra el estado de error y reintenta la carga', async () => {
+    const primary = jest.fn().mockRejectedValueOnce(new Error('Network Error')).mockResolvedValue(definitions);
+    mockedUseInjection.mockReturnValue({ vitalRepo: { listDefinitions: primary, recordVitals: jest.fn(), createDefinition: jest.fn() }, patientRepo: { getPatient: jest.fn().mockResolvedValue(patient) } });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RecordVitalsScreen navigation={{ navigate: jest.fn(), goBack: jest.fn() } as any} route={{ params: { patientId: 'p1' } } as any} />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText('No pudimos cargar la información')).toBeTruthy();
+    fireEvent.press(screen.getByText('Reintentar'));
+    await waitFor(() => expect(primary).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByText('No pudimos cargar la información')).toBeNull(), { timeout: 5000 });
+  });
+});

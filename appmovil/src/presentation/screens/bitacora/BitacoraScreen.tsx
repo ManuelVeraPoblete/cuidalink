@@ -10,6 +10,7 @@ import { BitacoraEntry, BitacoraEntryType } from '@/domain/entities';
 import BitacoraEntryCard from '@/presentation/components/BitacoraEntryCard';
 import PatientChip from '@/presentation/components/PatientChip';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import ErrorState from '@/presentation/components/ErrorState';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'Bitacora'>;
@@ -71,7 +72,7 @@ export default function BitacoraScreen({ navigation, route }: Props) {
     queryFn: () => patientRepo.getPatient(patientId),
   });
 
-  const { data: entries, isLoading } = useQuery({
+  const { data: entries, isLoading, isError, refetch } = useQuery({
     queryKey: ['bitacora-entries', patientId, from, to, typeFilter],
     queryFn: () => bitacoraEntryRepo.listEntries(patientId, from, to, typeFilter === 'ALL' ? undefined : typeFilter),
   });
@@ -79,6 +80,7 @@ export default function BitacoraScreen({ navigation, route }: Props) {
   const rangeLabel = RANGE_OPTIONS.find((o) => o.key === range)!.label;
 
   if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#5ee7df" /></ScreenBackground>;
+  if (isError) return <ScreenBackground><ErrorState onRetry={() => refetch()} onBack={() => navigation.goBack()} /></ScreenBackground>;
 
   return (
     <ScreenBackground>

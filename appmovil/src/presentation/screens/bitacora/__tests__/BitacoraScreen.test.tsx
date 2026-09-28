@@ -107,3 +107,22 @@ describe('BitacoraScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('AddBitacoraEntry', { patientId: 'p1' });
   });
 });
+
+describe('BitacoraScreen con error de carga', () => {
+  it('muestra el estado de error y reintenta la carga', async () => {
+    const primary = jest.fn().mockRejectedValueOnce(new Error('Network Error')).mockResolvedValue([]);
+    mockedUseInjection.mockReturnValue({ bitacoraEntryRepo: { listEntries: primary }, patientRepo: { getPatient: jest.fn().mockResolvedValue(patient) } });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <BitacoraScreen navigation={{ navigate: jest.fn(), goBack: jest.fn() } as any} route={{ params: { patientId: 'p1' } } as any} />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText('No pudimos cargar la información')).toBeTruthy();
+    expect(screen.queryByText('Sin entradas para este período.')).toBeNull();
+    fireEvent.press(screen.getByText('Reintentar'));
+    await waitFor(() => expect(primary).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByText('No pudimos cargar la información')).toBeNull(), { timeout: 5000 });
+  });
+});
