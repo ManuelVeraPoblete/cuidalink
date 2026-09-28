@@ -28,7 +28,8 @@ mvn test -q
 # Run a single test class
 mvn test -Dtest=AuthServiceTest -q
 
-# Run the app (requires PostgreSQL running locally)
+# Run the app (requires PostgreSQL running locally and backend/.env — copy from .env.example;
+# JWT_SECRET and DB_PASSWORD are mandatory)
 mvn spring-boot:run
 
 # Package

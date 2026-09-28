@@ -265,21 +265,21 @@ patients ──< vital_records (patient_id)
 
 ## Configuración
 
-### `application.properties`
+### Variables de entorno
 
-```properties
-server.port=8080
-server.servlet.context-path=/api/v1
+`application.properties` no contiene secretos: todo se lee de variables de entorno. Para desarrollo local, copiar `backend/.env.example` a `backend/.env` (ignorado por git) y completarlo; Spring lo importa automáticamente.
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/cuidalink
-spring.datasource.username=postgres
-spring.datasource.password=postgres
+| Variable | Obligatoria | Por defecto |
+|---|---|---|
+| `JWT_SECRET` | sí (≥ 32 bytes, `openssl rand -base64 48`) | — |
+| `DB_PASSWORD` | sí | — |
+| `DB_URL` | no | `jdbc:postgresql://localhost:5432/cuidalink` |
+| `DB_USERNAME` | no | `postgres` |
+| `JPA_DDL_AUTO` | no | `validate` (en local usar `update`) |
+| `CORS_ALLOWED_ORIGINS` | no | vacío: ningún origen (la app móvil no usa CORS) |
+| `FIREBASE_SERVICE_ACCOUNT_PATH` | no | `classpath:firebase-service-account.json` |
 
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-
-firebase.service-account-path=classpath:firebase-service-account.json
-```
+En producción el esquema se aplica con `backend/src/main/resources/schema.sql` y Hibernate solo lo valida.
 
 ### Firebase
 
