@@ -120,6 +120,18 @@ describe('PatientDetailScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('Today');
   });
 
+  it('navega a Report al presionar "Informe PDF" siendo dueño', async () => {
+    const { navigation } = renderScreen();
+    fireEvent.press(await screen.findByText('Informe PDF'));
+    expect(navigation.navigate).toHaveBeenCalledWith('Report', { patientId: 'p1' });
+  });
+
+  it('oculta "Informe PDF" a un colaborador', async () => {
+    renderScreen({ patient: { ...basePatient, isOwner: false } });
+    expect(await screen.findByText('Hoy')).toBeTruthy();
+    expect(screen.queryByText('Informe PDF')).toBeNull();
+  });
+
   it('llama al contacto de emergencia al presionar "Emergencia"', async () => {
     const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
     renderScreen();

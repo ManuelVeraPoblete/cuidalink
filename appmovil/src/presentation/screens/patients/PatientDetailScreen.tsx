@@ -190,6 +190,9 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
           <ActionCard icon="pulse" color="#e74c3c" title="Signos vitales" subtitle="Registrar control" onPress={goToVitales} />
           <ActionCard icon="clipboard" color="#f5a623" title="Bitácora" subtitle="Notas del cuidador" onPress={goToBitacora} />
           <ActionCard icon="call-outline" color="#2f6fed" title="Contactos" subtitle="Familia y médico" onPress={goToContacts} />
+          {patient.isOwner && (
+            <ActionCard icon="document-text" color="#e05555" title="Informe PDF" subtitle="Medicamentos y signos vitales" onPress={() => navigation.navigate('Report', { patientId })} fullWidth />
+          )}
           <ActionCard icon="time" color="#2f6fed" title="Historial" subtitle="Actividad reciente" onPress={() => goToComingSoon('Historial', 'Actividad reciente')} fullWidth />
         </View>
       </ScrollView>

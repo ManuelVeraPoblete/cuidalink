@@ -18,6 +18,7 @@ import TasksScreen from '@/presentation/screens/tasks/TasksScreen';
 import CreateTaskScreen from '@/presentation/screens/tasks/CreateTaskScreen';
 import BitacoraScreen from '@/presentation/screens/bitacora/BitacoraScreen';
 import AddBitacoraEntryScreen from '@/presentation/screens/bitacora/AddBitacoraEntryScreen';
+import ReportScreen from '@/presentation/screens/reports/ReportScreen';
 
 export type PatientStackParams = {
   Home: undefined;
@@ -39,6 +40,7 @@ export type PatientStackParams = {
   CreateTask: undefined;
   Today: undefined;
   EditProfile: undefined;
+  Report: { patientId: string };
 };
 
 const Stack = createNativeStackNavigator<PatientStackParams>();
@@ -71,6 +73,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Tasks" component={TasksScreen} options={{ headerShown: false }} />
       <Stack.Screen name="CreateTask" component={CreateTaskScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Today" component={TodayScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Report" component={ReportScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
