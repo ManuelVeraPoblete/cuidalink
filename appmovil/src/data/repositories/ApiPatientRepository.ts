@@ -1,6 +1,14 @@
 import apiClient from '@/data/http/apiClient';
-import { PatientRepository, CreatePatientData } from '@/domain/repositories/PatientRepository';
+import { PatientRepository, CreatePatientData, JoinPatientError } from '@/domain/repositories/PatientRepository';
 import { Patient, Collaborator } from '@/domain/entities';
+
+function toJoinError(err: unknown): JoinPatientError {
+  const { isAxiosError, response } = (err ?? {}) as { isAxiosError?: boolean; response?: { status?: number } };
+  if (isAxiosError && !response) return new JoinPatientError('NETWORK');
+  if (response?.status === 400) return new JoinPatientError('INVALID_CODE');
+  if (response?.status === 409) return new JoinPatientError('ALREADY_MEMBER');
+  return new JoinPatientError('UNKNOWN');
+}
 
 export class ApiPatientRepository implements PatientRepository {
   async listPatients(): Promise<Patient[]> {
@@ -61,11 +69,15 @@ export class ApiPatientRepository implements PatientRepository {
   }
 
   async getInvitationCode(patientId: string): Promise<string> {
-    const res = await apiClient.post<{ code: string }>(`/patients/${patientId}/invitation`);
+    const res = await apiClient.post<{ code: string }>(`/patients/${patientId}/invitations`);
     return res.data.code;
   }
 
   async joinPatient(code: string): Promise<void> {
-    await apiClient.post('/patients/join', { code });
+    try {
+      await apiClient.post('/invitations/join', { code });
+    } catch (err) {
+      throw toJoinError(err);
+    }
   }
 }

@@ -1,15 +1,31 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Image, Alert } from 'react-native';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PatientStackParams } from '@/presentation/navigation/AppNavigator';
 import { useInjection } from '@/presentation/hooks/useInjection';
 import { Patient } from '@/domain/entities';
+import { JoinPatientError } from '@/domain/repositories/PatientRepository';
+import JoinCodeDialog from '@/presentation/components/JoinCodeDialog';
 import { calcAge, nextPendingLog, needsAttention } from '@/domain/utils/patientDisplay';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
 import { localDateString } from '@/domain/utils/localDate';
 
 type Props = { navigation: NativeStackNavigationProp<PatientStackParams, 'Pacientes'> };
+
+function joinErrorAlert(err: unknown) {
+  const reason = err instanceof JoinPatientError ? err.reason : null;
+  if (reason === 'NETWORK') {
+    Alert.alert('Sin conexión', 'Revisa tu conexión a internet e intenta de nuevo.');
+  } else if (reason === 'INVALID_CODE') {
+    Alert.alert('No se pudo unir', 'El código es inválido, ya fue usado o expiró.');
+  } else if (reason === 'ALREADY_MEMBER') {
+    Alert.alert('No se pudo unir', 'Ya eres colaborador de este paciente.');
+  } else {
+    Alert.alert('Error', 'No se pudo completar la solicitud. Intenta de nuevo más tarde.');
+  }
+}
 
 type PatientCardProps = { patient: Patient; onPress: () => void };
 
@@ -94,10 +110,26 @@ function PatientCard({ patient, onPress }: PatientCardProps) {
 
 export default function PatientsListScreen({ navigation }: Props) {
   const { patientRepo } = useInjection();
+  const queryClient = useQueryClient();
+  const [joinVisible, setJoinVisible] = useState(false);
   const { data, isLoading, error } = useQuery({
     queryKey: ['patients'],
     queryFn: () => patientRepo.listPatients(),
   });
+
+  const joinMutation = useMutation({
+    mutationFn: (code: string) => patientRepo.joinPatient(code),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patients'] });
+      Alert.alert('Listo', 'Te uniste como colaborador. El paciente ya aparece en tu lista.');
+    },
+    onError: joinErrorAlert,
+  });
+
+  function handleJoin(code: string) {
+    setJoinVisible(false);
+    joinMutation.mutate(code);
+  }
 
   if (isLoading) return <ScreenBackground><ActivityIndicator style={{ flex: 1 }} size="large" color="#2D7DD2" /></ScreenBackground>;
   if (error) return <ScreenBackground><View style={styles.center}><Text style={styles.errorText}>Error al cargar pacientes</Text></View></ScreenBackground>;
@@ -144,9 +176,26 @@ export default function PatientsListScreen({ navigation }: Props) {
                   </View>
                 </TouchableOpacity>
               </View>
+
+              <TouchableOpacity
+                style={styles.joinButton}
+                onPress={() => setJoinVisible(true)}
+                disabled={joinMutation.isPending}
+              >
+                {joinMutation.isPending ? (
+                  <ActivityIndicator size="small" color="#5ee7df" />
+                ) : (
+                  <Ionicons name="key-outline" size={16} color="#5ee7df" />
+                )}
+                <Text style={styles.joinButtonText}>Tengo un código</Text>
+              </TouchableOpacity>
             </>
           }
-          ListEmptyComponent={<Text style={styles.empty}>No tienes pacientes aún.</Text>}
+          ListEmptyComponent={
+            <Text style={styles.empty}>
+              No tienes pacientes aún. Crea uno con el botón + o, si otro cuidador te invitó, únete con el código de invitación.
+            </Text>
+          }
           ListFooterComponent={
             <View style={styles.footer}>
               <Ionicons name="shield-checkmark" size={20} color="#5ee7df" />
@@ -158,6 +207,7 @@ export default function PatientsListScreen({ navigation }: Props) {
           contentContainerStyle={{ padding: 20, paddingTop: 24 }}
         />
       </View>
+      <JoinCodeDialog visible={joinVisible} onClose={() => setJoinVisible(false)} onJoin={handleJoin} />
     </ScreenBackground>
   );
 }
@@ -166,7 +216,17 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   errorText: { color: '#ff8a8a' },
-  empty: { textAlign: 'center', color: '#e2e8f0', marginTop: 40 },
+  empty: { textAlign: 'center', color: '#e2e8f0', marginTop: 40, lineHeight: 20 },
+
+  joinButton: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10,
+    marginTop: -8, marginBottom: 20,
+  },
+  joinButtonText: { color: '#a5d8f3', fontSize: 13, fontWeight: '600' },
 
   headerLogoIcon: { width: 40, height: 40 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 24 },
