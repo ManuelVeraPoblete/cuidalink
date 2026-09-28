@@ -8,6 +8,7 @@ import { useInjection } from '@/presentation/hooks/useInjection';
 import { useAuthStore } from '@/presentation/stores/authStore';
 import { calcAge, nextPendingLog, needsAttention } from '@/domain/utils/patientDisplay';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import { localDateString } from '@/domain/utils/localDate';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'PatientDetail'>;
@@ -46,7 +47,7 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
   const { patientId } = route.params;
   const { patientRepo, medicationRepo } = useInjection();
   const setSelectedPatientId = useAuthStore((s) => s.setSelectedPatientId);
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateString();
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ['patient', patientId],
@@ -71,6 +72,11 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
       return;
     }
     Linking.openURL(`tel:${phone}`);
+  }
+
+  function goToToday() {
+    setSelectedPatientId(patientId);
+    navigation.navigate('Today');
   }
 
   function goToMedicamentos() {
@@ -178,7 +184,7 @@ export default function PatientDetailScreen({ navigation, route }: Props) {
         <Text style={styles.sectionSubtitle}>Acciones para hoy</Text>
 
         <View style={styles.grid}>
-          <ActionCard icon="calendar" color="#2f6fed" title="Hoy" subtitle="Pendientes" onPress={() => navigation.navigate('Today')} />
+          <ActionCard icon="calendar" color="#2f6fed" title="Hoy" subtitle="Pendientes" onPress={goToToday} />
           <ActionCard icon="medkit" color="#16a085" title="Medicamentos" subtitle="Dosis y horarios" onPress={goToMedicamentos} />
           <ActionCard icon="list" color="#7c5cfc" title="Tareas" subtitle="Cuidados diarios" onPress={goToTasks} />
           <ActionCard icon="pulse" color="#e74c3c" title="Signos vitales" subtitle="Registrar control" onPress={goToVitales} />

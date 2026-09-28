@@ -15,6 +15,7 @@ import { useInjection } from '@/presentation/hooks/useInjection';
 import { useAuthStore } from '@/presentation/stores/authStore';
 import { needsAttention } from '@/domain/utils/patientDisplay';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import { localDateString } from '@/domain/utils/localDate';
 
 function toLocalDateString(date: Date): string {
   const yyyy = date.getFullYear();
@@ -71,7 +72,7 @@ export default function CreateTaskScreen({ navigation }: Props) {
   const { careTaskRepo, patientRepo, medicationRepo } = useInjection();
   const selectedPatientId = useAuthStore((s) => s.selectedPatientId);
   const queryClient = useQueryClient();
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateString();
 
   const { data: patient } = useQuery({
     queryKey: ['patient', selectedPatientId],

@@ -10,6 +10,7 @@ import { MedicationLog } from '@/domain/entities';
 import MedicationCard from '@/presentation/components/MedicationCard';
 import MedicationActionModal from '@/presentation/components/MedicationActionModal';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import { localDateString } from '@/domain/utils/localDate';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'Medicamentos'>;
@@ -27,7 +28,7 @@ export default function DailyMedsScreen({ navigation }: Props) {
   const { medicationRepo } = useInjection();
   const selectedPatientId = useAuthStore((s) => s.selectedPatientId);
   const queryClient = useQueryClient();
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateString();
   const [tab, setTab] = useState<Tab>('ALL');
   const [selectedLog, setSelectedLog] = useState<MedicationLog | null>(null);
 

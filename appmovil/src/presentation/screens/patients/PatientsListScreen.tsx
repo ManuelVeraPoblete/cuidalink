@@ -7,6 +7,7 @@ import { useInjection } from '@/presentation/hooks/useInjection';
 import { Patient } from '@/domain/entities';
 import { calcAge, nextPendingLog, needsAttention } from '@/domain/utils/patientDisplay';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import { localDateString } from '@/domain/utils/localDate';
 
 type Props = { navigation: NativeStackNavigationProp<PatientStackParams, 'Pacientes'> };
 
@@ -14,7 +15,7 @@ type PatientCardProps = { patient: Patient; onPress: () => void };
 
 function PatientCard({ patient, onPress }: PatientCardProps) {
   const { medicationRepo } = useInjection();
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateString();
 
   const { data: logs } = useQuery({
     queryKey: ['medication-logs', patient.id, today],

@@ -10,6 +10,7 @@ import { CareTaskLog } from '@/domain/entities';
 import TaskCard from '@/presentation/components/TaskCard';
 import TaskActionModal from '@/presentation/components/TaskActionModal';
 import ScreenBackground from '@/presentation/components/ScreenBackground';
+import { localDateString } from '@/domain/utils/localDate';
 
 type Props = {
   navigation: NativeStackNavigationProp<PatientStackParams, 'Tasks'>;
@@ -26,7 +27,7 @@ export default function TasksScreen({ navigation }: Props) {
   const { careTaskRepo } = useInjection();
   const selectedPatientId = useAuthStore((s) => s.selectedPatientId);
   const queryClient = useQueryClient();
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateString();
   const [tab, setTab] = useState<Tab>('ALL');
   const [selectedLog, setSelectedLog] = useState<CareTaskLog | null>(null);
 

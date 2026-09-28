@@ -113,9 +113,10 @@ describe('PatientDetailScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('Bitacora', { patientId: 'p1' });
   });
 
-  it('navega a Today al presionar "Hoy"', async () => {
+  it('selecciona el paciente y navega a Today al presionar "Hoy"', async () => {
     const { navigation } = renderScreen();
     fireEvent.press(await screen.findByText('Hoy'));
+    expect(useAuthStore.getState().selectedPatientId).toBe('p1');
     expect(navigation.navigate).toHaveBeenCalledWith('Today');
   });
 
