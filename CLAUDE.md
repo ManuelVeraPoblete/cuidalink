@@ -6,11 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 CuidaLink is a home-caregiver mobile app. A primary caregiver manages medications, vital signs, and daily logs for patients, and can invite collaborators who have limited write access.
 
-**Repo structure (being built — only docs exist today):**
+**Repo structure:**
 ```
 cuidalink/
 ├── backend/    ← Java 17 + Spring Boot 3.2, Maven
-├── appmovil/   ← React Native 0.74 + TypeScript
+├── appmovil/   ← Expo SDK 54 (React Native 0.81) + TypeScript
 └── docs/       ← Design spec and implementation plans
 ```
 
@@ -38,7 +38,7 @@ mvn package -q
 
 **Database:** PostgreSQL 15 running locally (`localhost:5432`, database `cuidalink`). No Docker.
 
-**Test database:** Testcontainers spins up PostgreSQL automatically when running integration tests — no manual setup needed.
+**Test database:** Integration tests (`*IntegrationTest`) use Testcontainers and require Docker; without it they error out while unit and controller tests still pass.
 
 ## Mobile App Commands
 
@@ -46,14 +46,17 @@ mvn package -q
 cd cuidalink/appmovil
 
 npm install
-npx react-native start          # Metro bundler
-npx react-native run-android
-npx react-native run-ios
+npm run android                 # expo run:android — builds a dev client and installs it
+npm run ios                     # expo run:ios
+npm start                       # expo start — Metro only, app already installed
+
+# Backend URL: EXPO_PUBLIC_API_BASE_URL in appmovil/.env (copy from .env.example).
+# Android emulator: http://10.0.2.2:8080/api/v1 · physical device: http://<PC-IP>:8080/api/v1
+# Push notifications are disabled in Expo Go — use a dev build (npm run android).
 
 # Tests
 npx jest                        # unit + component tests
-npx jest --testPathPattern=path/to/test   # single test file
-npx detox test                  # E2E tests
+npx jest path/to/test --forceExit   # single file (without --forceExit Jest may not exit)
 ```
 
 ## Backend Architecture — Hexagonal (strict)
@@ -102,7 +105,7 @@ src/
 **Dependency rule:** `presentation/` imports only from `domain/`. It never imports from `data/` directly. All wiring happens in `useInjection.ts`.
 
 **State split:**
-- Zustand: auth state only (current user, Firebase token)
+- Zustand: auth state only (current user, selected patient); the JWT lives in expo-secure-store
 - TanStack Query: all remote data, `staleTime: 60_000`
 - Forms: React Hook Form + Zod schemas
 
@@ -127,7 +130,7 @@ src/
 **Mobile:**
 - Unit tests (Jest): domain use cases and data mappers.
 - Component tests (RNTL): screens with repositories mocked.
-- E2E (Detox): login, confirm medication, record vitals.
+- E2E: not set up yet (Detox was planned but is not installed).
 
 ## Tech Stack Reference
 
@@ -136,12 +139,12 @@ src/
 | Backend | Java 17, Spring Boot 3.2, Spring Security, Spring Data JPA |
 | Backend extras | Firebase Admin SDK 9.2, iText 7.2.5, Bucket4j 8.7 |
 | Database | PostgreSQL 15 (local, no Docker) |
-| Auth | Firebase Authentication (Email/Password + Google OAuth) |
+| Auth | Backend-issued JWT (jjwt, BCrypt passwords) |
 | Push | Firebase Cloud Messaging (FCM) |
-| Mobile | React Native 0.74, TypeScript 5 (strict), React Navigation 6 |
+| Mobile | Expo SDK 54, React Native 0.81, TypeScript 5 (strict), React Navigation 7 |
 | Mobile state | Zustand 5 (auth), TanStack Query 5 (data), Axios 1.x |
 | Mobile forms | React Hook Form 7 + Zod 3 |
-| Mobile testing | Jest, React Native Testing Library, Detox |
+| Mobile testing | Jest (jest-expo), React Native Testing Library |
 
 ## Implementation Plans
 
